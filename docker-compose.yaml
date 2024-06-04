@@ -7,34 +7,45 @@ services:
     ports:
       - "6379:6379"
 
-  executor:
-    build:
-      context: ./src/executor
-      dockerfile: Dockerfile.exec
-    image: executor
-    container_name: executor
-
   celery-worker:
     build:
-      context: .
+      context: ./judge
     container_name: celery-worker
     command: celery -A src.tasks worker --loglevel=info
     volumes:
-      - .:/app
+      - ./judge:/app
       - /var/run/docker.sock:/var/run/docker.sock
+      - app_data:/app/data
     depends_on:
       - redis
-      - executor
+    
+  flower:
+    build: 
+      context: ./judge
+    image: mher/flower
+    container_name: flower
+    command: ["celery", "-A", "src.tasks", "flower", "--port=5555", "--broker=redis://redis:6379/0"]
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
 
   streamlit:
     build:
-      context: .
+      context: ./front
     container_name: streamlit
     ports:
       - "8501:8501"
     volumes:
-      - .:/app
+      - ./front:/app
       - /var/run/docker.sock:/var/run/docker.sock
+      - app_data:/app/data
     depends_on:
       - redis
-      - executor
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+
+volumes:
+  app_data:
