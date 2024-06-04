@@ -26,10 +26,16 @@ $ python3 problems/helper.py genout {problem_name}
 
 
 
+### ビルド
+
+```bash
+$ docker-compose build
+```
+
 ### 起動
 
 ```bash
-$ docker-compose up
+$ docker-compose up -d
 ```
 
 ### 終了
