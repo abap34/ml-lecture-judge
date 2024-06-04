@@ -2,7 +2,8 @@
 
 機械学習講習会用のオンラインジャッジ.
 
-Streamlit でページ作成, ジャッジは Celery + Redis + Docker.
+Streamlit でページ作成, ジャッジは Celery + Redis + Docker. 
+ジョブの監視は Flower. 
 
 ## Usage
 
@@ -25,7 +26,6 @@ $ python3 problems/helper.py genout {problem_name}
 で出力を生成する。
 
 
-
 ### ビルド
 
 ```bash
@@ -37,6 +37,10 @@ $ docker-compose build
 ```bash
 $ docker-compose up -d
 ```
+
+- `http://localhost:8501`
+- `http://localhost:5555` (flower)
+
 
 ### 終了
 
