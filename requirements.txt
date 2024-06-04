@@ -1,0 +1,4 @@
+streamlit==1.34.0
+docker==7.1.0
+celery==5.4.0
+redis==5.0.4
