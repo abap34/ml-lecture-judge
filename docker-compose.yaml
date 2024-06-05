@@ -38,6 +38,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      - ./backend:/app  # hot reload
       - /var/run/docker.sock:/var/run/docker.sock
       - data:/app/data
     depends_on:
@@ -46,6 +47,17 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+
+  front:
+    build:
+      context: ./front
+    container_name: front
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./front:/app  # hot reload
+    depends_on:
+      - backend
 
 volumes:
   data:
