@@ -2,7 +2,8 @@
 
 機械学習講習会用のオンラインジャッジ.
 
-Streamlit でページ作成, ジャッジは Celery + Redis + Docker. 
+フロントは React + Material-UI.
+ジャッジは Celery + Redis + Docker. 
 ジョブの監視は Flower. 
 
 ## Usage
