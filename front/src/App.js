@@ -1,45 +1,60 @@
-import React, { useState } from 'react';
-import { Container, TextField, Button, Typography, Box } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Container, Button, Typography, Box } from '@mui/material';
+import { useCodeMirror } from '@uiw/react-codemirror';
 import axios from 'axios';
 
 function App() {
-  const [username, setUsername] = useState('');
-  const [greeting, setGreeting] = useState('');
+  const [code, setCode] = useState('');
 
-  const handleInputChange = (e) => {
-    setUsername(e.target.value);
-  };
-
-  const handleButtonClick = async () => {
+  const handleCodeSubmit = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/${username}`);
-      setGreeting(response.data.Hello);
+      const response = await axios.post(`http://localhost:8000/submit`, { code });
+      console.log(`Code length: ${response.data.length}`); // コードの長さを表示
     } catch (error) {
-      console.error("There was an error fetching the greeting!", error);
+      console.error("There was an error submitting the code!", error);
     }
   };
 
+  // CodeMirrorの設定
+  const editor = useRef(null);
+  const { setContainer } = useCodeMirror({
+    container: editor.current,
+    value: '\n\n\n\n\n\n\n\n\n\n\n\n\n\n',
+    options: {
+      mode: 'python',
+      lineNumbers: true,
+      lineWrapping: true, // 行の自動折り返し
+    },
+    onChange: (value, viewUpdate) => {
+      setCode(value);
+    },
+  });
+
+  useEffect(() => {
+    if (editor.current) {
+      setContainer(editor.current);
+    }
+  }, [setContainer]);
+
   return (
-    <Container maxWidth="sm" style={{ marginTop: '100px' }}>
+    <Container maxWidth="md" style={{ marginTop: '50px' }}>
       <Typography variant="h3" component="h1" gutterBottom>
-        Welcome
+        Code Editor
       </Typography>
-      <Box display="flex" flexDirection="column" alignItems="center">
-        <TextField
-          label="Enter your username"
-          variant="outlined"
-          value={username}
-          onChange={handleInputChange}
-          style={{ marginBottom: '20px', width: '100%' }}
-        />
-        <Button variant="contained" color="primary" onClick={handleButtonClick}>
-          Submit
+      <Box mt={4} width="100%">
+        <div
+          ref={editor}
+          style={{
+            border: '1px solid #ddd',
+            borderRadius: '4px',
+            padding: '10px',
+            height: '400px',
+            overflow: 'auto'
+          }}
+        ></div>
+        <Button variant="contained" color="primary" onClick={handleCodeSubmit} style={{ marginTop: '20px' }}>
+          Submit Code
         </Button>
-        {greeting && (
-          <Typography variant="h5" component="h2" style={{ marginTop: '20px' }}>
-            Hello, {greeting}!
-          </Typography>
-        )}
       </Box>
     </Container>
   );
