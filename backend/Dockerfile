@@ -12,5 +12,5 @@ RUN mkdir -p /app/data
 
 ENV PYTHONPATH=/app/src
 
-CMD ["sh", "-c", "python -u src/db.py && uvicorn src.main:app --host 0.0.0.0  --port 8000"]
+CMD ["sh", "-c", "python -u src/db.py && uvicorn src.main:app --host 0.0.0.0  --port 8000 --reload"]
 
