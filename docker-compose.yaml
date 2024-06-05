@@ -9,22 +9,23 @@ services:
 
   celery-worker:
     build:
-      context: ./backend/judge
+      context: ./backend
+      dockerfile: Dockerfile.celery
     container_name: celery-worker
-    command: celery -A src.tasks worker --loglevel=info
+    command: celery -A judge.tasks worker --loglevel=info
     volumes:
-      - ./judge:/app
       - /var/run/docker.sock:/var/run/docker.sock
-      - app_data:/app/data
+      - data:/app/data
     depends_on:
       - redis
     
   flower:
-    build: 
-      context: ./backend/judge
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.celery
     image: mher/flower
     container_name: flower
-    command: ["celery", "-A", "src.tasks", "flower", "--port=5555", "--broker=redis://redis:6379/0"]
+    command: celery -A judge.tasks --broker=redis://redis:6379/0 flower --port=5555 
     ports:
       - "5555:5555"
     depends_on:
@@ -32,14 +33,13 @@ services:
 
   backend:
     build:
-      context: ./backend/app
+      context: ./backend
     container_name: backend 
     ports:
-      - "8501:8501"
+      - "8000:8000"
     volumes:
-      - ./app:/app
       - /var/run/docker.sock:/var/run/docker.sock
-      - app_data:/app/data
+      - data:/app/data
     depends_on:
       - redis
     environment:
@@ -48,4 +48,4 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
 
 volumes:
-  app_data:
+  data:

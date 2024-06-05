@@ -1,8 +1,6 @@
 import sqlite3
 
 def init_db():
-    print("Initializing database...")
-    # dbファイルが存在しない場合は作成して、テーブルを作成
     conn = sqlite3.connect('/app/data/database.db')
     c = conn.cursor()
     c.execute('''
