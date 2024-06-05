@@ -9,7 +9,7 @@ services:
 
   celery-worker:
     build:
-      context: ./judge
+      context: ./backend/judge
     container_name: celery-worker
     command: celery -A src.tasks worker --loglevel=info
     volumes:
@@ -21,7 +21,7 @@ services:
     
   flower:
     build: 
-      context: ./judge
+      context: ./backend/judge
     image: mher/flower
     container_name: flower
     command: ["celery", "-A", "src.tasks", "flower", "--port=5555", "--broker=redis://redis:6379/0"]
@@ -30,14 +30,14 @@ services:
     depends_on:
       - redis
 
-  streamlit:
+  backend:
     build:
-      context: ./front
-    container_name: streamlit
+      context: ./backend/app
+    container_name: backend 
     ports:
       - "8501:8501"
     volumes:
-      - ./front:/app
+      - ./app:/app
       - /var/run/docker.sock:/var/run/docker.sock
       - app_data:/app/data
     depends_on:

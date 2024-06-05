@@ -1,5 +1,4 @@
-# Dockerfile for Streamlit app
-
+# Dockerfile for app
 FROM python:3.12-slim
 
 WORKDIR /app
@@ -11,4 +10,7 @@ COPY src/ ./src/
 
 RUN mkdir -p /app/data 
 
-CMD ["sh", "-c", "python -u src/db.py && streamlit run src/app.py"]
+ENV PYTHONPATH=/app/src
+
+CMD ["sh", "-c", "python -u src/db.py && uvicorn src.main:app --host 0.0.0.0  --port 8000"]
+
