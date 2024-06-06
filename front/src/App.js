@@ -142,7 +142,7 @@ function ProblemDetail() {
       <Typography variant="h3" component="h1" gutterBottom>
         {problemSummary.title}
       </Typography>
-      
+
       <Box display="flex" justifyContent="flex-start" mb={2}>
         <Typography variant="body1" sx={{ marginRight: 2 }}>Points: {problemSummary.points}</Typography>
         <Typography variant="body1" sx={{ marginRight: 2 }}>Time Limit: {problemConstraint.time} [ms] </Typography>
@@ -179,9 +179,38 @@ function Welcome() {
       <Typography variant="h3" component="h1" gutterBottom>
         Welcome!
       </Typography>
+
       <Typography variant="body1" gutterBottom>
-        Please select a problem from the sidebar to get started.
+        このサイトは機械学習講習会用のオンラインジャッジです。
+        <br />
+        講習会の演習問題の提出・採点、順位表の確認ができます。
       </Typography>
+
+      <Typography variant="h4" component="h2" gutterBottom>
+        &gt; Usage
+      </Typography>
+      <Typography variant="body1" gutterBottom>
+        サイドバーから問題を選択してください。
+      </Typography>
+
+      <Typography variant="h4" component="h2" gutterBottom>
+        &gt; Environment
+      </Typography>
+
+      <Typography variant="body1" gutterBottom>
+        ジャッジは以下の環境で実行されます。
+      </Typography>
+
+      <Typography variant="body1" component="pre" gutterBottom>
+        Python 3.12.0
+        <br />
+        numpy==1.26.4
+        <br />
+        torch==2.3.0
+        <br />
+        scikit-learn==1.5.0
+      </Typography>
+
     </Container>
   );
 }
