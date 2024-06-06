@@ -30,16 +30,17 @@ $ python3 problems/helper.py genout {problem_name}
 ### ビルド
 
 ```bash
-$ docker-compose build
+$ ./build.sh
 ```
 
 ### 起動
 
 ```bash
-$ docker-compose up -d
+$ docker-compose up 
 ```
 
-- `http://localhost:8501`
+- `http://localhost:3000` (front)
+- `http://localhost:8000` (back)
 - `http://localhost:5555` (flower)
 
 
