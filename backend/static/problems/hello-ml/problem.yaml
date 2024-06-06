@@ -1,11 +1,11 @@
 # 概要
 summary: 
-  title: 
-  points: 
+  title: Hello, AutoGrad
+  points: 100
   
 # 制約
 constraint:
   # 実行時間制限 (ミリ秒)
-  time: 
+  time: 2000
   # メモリ制限 (MB)
-  memory: 
+  memory: 128
