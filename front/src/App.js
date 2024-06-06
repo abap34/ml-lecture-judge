@@ -5,25 +5,26 @@ import axios from 'axios';
 
 function App() {
   const [code, setCode] = useState('');
+  const [problemTitle, setProblemTitle] = useState('Sample Problem Title');
+  const [problemContent, setProblemContent] = useState('Here is the problem description...');
 
   const handleCodeSubmit = async () => {
     try {
-      const response = await axios.post(`http://localhost:8000/submit`, { code });
-      console.log(`Code length: ${response.data.length}`); // コードの長さを表示
+      const response = await axios.post('http://localhost:8000/submit', { code });
+      console.log(`Response json: ${JSON.stringify(response.data)}`);
     } catch (error) {
       console.error("There was an error submitting the code!", error);
     }
   };
 
-  // CodeMirrorの設定
   const editor = useRef(null);
   const { setContainer } = useCodeMirror({
     container: editor.current,
-    value: '\n\n\n\n\n\n\n\n\n\n\n\n\n\n',
+    value: '',
     options: {
       mode: 'python',
       lineNumbers: true,
-      lineWrapping: true, // 行の自動折り返し
+      lineWrapping: true,
     },
     onChange: (value, viewUpdate) => {
       setCode(value);
@@ -39,7 +40,10 @@ function App() {
   return (
     <Container maxWidth="md" style={{ marginTop: '50px' }}>
       <Typography variant="h3" component="h1" gutterBottom>
-        Code Editor
+        {problemTitle}
+      </Typography>
+      <Typography variant="body1" gutterBottom>
+        {problemContent}
       </Typography>
       <Box mt={4} width="100%">
         <div
