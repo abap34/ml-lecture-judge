@@ -58,6 +58,7 @@ def build_command(code, input_data, time):
     # quote して攻撃を防ぐ
     code = shlex.quote(code)
     input_data = shlex.quote(input_data)
+    time = shlex.quote(str(time))
 
     # /bin/sh を挟まないと && が使えないので使う.
     # list2cmdline でコードの内部の特殊文字もエスケープする
