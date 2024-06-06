@@ -1,18 +1,15 @@
-from celery import Celery
 import os
 import json
+import shlex
+import subprocess
+from datetime import datetime
 import docker
+from celery import Celery
 
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 
 app = Celery("tasks", broker=REDIS_URL, backend=REDIS_URL)
-
-import docker
-
-from dataclasses import dataclass
-
-from datetime import datetime
 
 
 class ExecutionResult:
@@ -43,8 +40,8 @@ class ExecutionResult:
             finish_datetime=datetime.now(),
         )
 
-    def to_json(self):
-        d = {
+    def to_dict(self):
+        return {
             "stdout": self.stdout,
             "stderr": self.stderr,
             "status": self.status,
@@ -53,14 +50,24 @@ class ExecutionResult:
             "finish_datetime": self.finish_datetime.isoformat(),
         }
 
-        return json.dumps(d)
+    def to_json(self):
+        return json.dumps(self.to_dict())
 
 
 def build_command(code, input_data, time):
-    code = code.replace('"', '\\"')
-    input_data = input_data.replace('"', '\\"')
-    # /bin/sh を挟まないと && が使えない
-    return f"/bin/sh -c \"echo '{code}' > code.py && echo '{input_data}' > input.txt && python /app/executor.py --code code.py --input input.txt --time {time}\""
+    # quote して攻撃を防ぐ
+    code = shlex.quote(code)
+    input_data = shlex.quote(input_data)
+
+    # /bin/sh を挟まないと && が使えないので使う.
+    # list2cmdline でコードの内部の特殊文字もエスケープする
+    return subprocess.list2cmdline(
+        [
+            "/bin/sh",
+            "-c",
+            f"echo {code} > code.py && echo {input_data} > input.txt && python /app/executor.py --code code.py --input input.txt --time {time}",
+        ]
+    )
 
 
 def run(code: str, input_data: str, time: float, memory: float) -> ExecutionResult:
@@ -69,7 +76,7 @@ def run(code: str, input_data: str, time: float, memory: float) -> ExecutionResu
         log = client.containers.run(
             image="executor_image",
             command=build_command(code, input_data, time),
-            cpu_period=int(time * 100000),
+            cpu_period=1000000,  # 1000ms
             mem_limit=f"{memory}m",
             pids_limit=4,
             stdout=True,
@@ -112,8 +119,8 @@ def run(code: str, input_data: str, time: float, memory: float) -> ExecutionResu
             memory=0.0,
             finish_datetime=datetime.now(),
         )
-    
-    #　予期せぬそのほかのエラー (ランタイムエラーは含まれない！. REは executor.py で処理される)
+
+    # 　予期せぬそのほかのエラー (ランタイムエラーは含まれない！. REは executor.py で処理される)
     except docker.errors.DockerException as e:
         return ExecutionResult(
             stdout="",
@@ -130,9 +137,9 @@ def run(code: str, input_data: str, time: float, memory: float) -> ExecutionResu
 @app.task(name="tasks.evaluate_code")
 def evaluate_code(code: str, submission_time: str):
     # 20s
-    result = run(code, input_data="hogehoge", time=20000.0, memory=256.0)
+    result = run(code, input_data="hogehoge", time=2000.0, memory=256.0)
 
     return {
         "submission_time": submission_time,
-        "result": result.to_json(),
+        "result": result.to_dict(),
     }
