@@ -35,8 +35,7 @@ def main(config: Config) -> Result:
     try:
         result = subprocess.run(
             cmd,
-            # ms で渡されるので s に変換
-            timeout=config.time * 1000,
+            timeout=config.time / 1000,
             input=config.input_file.read_text(),
             check=True,  # CalledProcessError を発生させる
             capture_output=True,
