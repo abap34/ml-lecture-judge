@@ -1,10 +1,13 @@
 from datetime import datetime
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+import yaml
+import glob
+
 import uvicorn
 
-from judge.tasks import evaluate_code
 
+from judge.tasks import evaluate_code
 
 
 app = FastAPI()
@@ -22,13 +25,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-@app.get("/{name}")
-def read_item(name: str):
-    return {"Hello": name}
 
 
 @app.post("/submit")
@@ -46,6 +42,29 @@ def get_result(task_id: str):
         return {"status": "Completed", "result": task.get()}
     else:
         return {"status": "Pending"}
+    
+# 全部の問題名を返す
+@app.get("/problems")
+def get_problems():
+    problems = glob.glob("static/problems/*")
+    # helper.py は除外してディレクトリ名だけを返す
+    problems = [problem.split("/")[-1] for problem in problems if problem != "static/problems/helper.py"]
+    # タイトルもとる
+    problems = [{"name": problem, "title": yaml.safe_load(open(f"static/problems/{problem}/problem.yaml"))["summary"]["title"]} for problem in problems]
+    return {
+        "problems": [problem for problem in problems]
+    }
+
+# static/problems/{problem} 以下の内容を返す
+# 返すもの: problem.yaml description.md
+@app.get("/problems/{problem_name}")
+def get_problem(problem_name: str):
+    with open(f"static/problems/{problem_name}/problem.yaml") as f:
+        problem = yaml.safe_load(f)
+    with open(f"static/problems/{problem_name}/description.md") as f:
+        description = f.read()
+    return {"problem": problem, "description": description}
+    
     
 @app.get("/jobs")
 def get_jobs():
