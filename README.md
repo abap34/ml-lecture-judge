@@ -2,15 +2,67 @@
 
 機械学習講習会用のオンラインジャッジ.
 
-フロントは React + Material-UI.
-ジャッジは Celery + Redis + Docker. 
-ジョブの監視は Flower. 
+フロントは React.
+
+ジャッジは Celery + Redis でジョブをキューイングして Docker上で実行して、 Flower で監視.
+
+バックエンドは FastAPI.
+
+```
+.
+.
+├── README.md
+├── backend
+│   ├── Dockerfile                      # バックエンドサーバ用の Dockerfile
+│   ├── Dockerfile.celery               # Celery 用の Dockerfile
+│   ├── Dockerfile.executor             # ジャッジのときに実際にコードを実行するコンテナ用の Dockerfile
+│   ├── check.py
+│   ├── requirements.txt                # バックエンドサーバ用のライブラリ
+│   ├── src
+│   │   ├── db.py
+│   │   ├── executor.py                 # ジャッジの実際の実行のインターフェース
+│   │   ├── judge
+│   │   │   ├── __init__.py
+│   │   │   ├── requirements.txt        # ユーザが使えるライブラリ
+│   │   │   └── tasks.py                # Celery 用のタスク
+│   │   └── main.py
+│   └── static
+│       └── problems                    # ここ以下に問題を追加する
+│           ├── hello-ml
+│           │   ├── description.md
+│           │   ├── in
+│           │   ├── out
+│           │   ├── problem.yaml
+│           │   └── solution.py
+│           └── helper.py
+├── build.sh
+├── docker-compose.yaml
+└── front
+    ├── Dockerfile
+    ├── package-lock.json
+    ├── package.json
+    ├── public
+    │   ├── favicon.ico
+    │   ├── index.html
+    │   ├── manifest.json
+    │   └── robots.txt
+    └── src
+        ├── App.css
+        ├── App.js
+        ├── App.test.js
+        ├── index.css
+        ├── index.js
+        ├── reportWebVitals.js
+        └── setupTests.js
+
+```
 
 ## Usage
 
 ### セットアップ
 
-`src/executor/requirements.txt` にジャッジで必要なライブラリを記述する。
+`backend/src/judge/requirements.txt` にユーザが使っていいライブラリを追加する。
+
 
 問題を追加する。
 
