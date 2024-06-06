@@ -55,9 +55,15 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./front:/app  # hot reload
+      - ./front:/app  
     depends_on:
       - backend
+
+  executor:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.executor
+    # tty: true
 
 volumes:
   data:
