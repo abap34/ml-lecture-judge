@@ -1,0 +1,10 @@
+FROM python:3.12-slim
+
+RUN pip install numpy torch scikit-learn
+
+WORKDIR /app
+
+COPY src/ /app/
+
+CMD ["tail", "-f", "/dev/null"]
+
