@@ -1,8 +1,8 @@
 # Dependencies for the backend
-docker==7.1.0
-celery==5.4.0
-redis==5.0.4
-fastapi==0.99.1
-flower==2.0.1
-uvicorn==0.22.0
+docker
+celery
+redis
+fastapi
+flower
+uvicorn
 pyyaml
