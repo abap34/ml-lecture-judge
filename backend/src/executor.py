@@ -10,6 +10,7 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 
+
 @dataclass
 class Config:
     code_file: Path
@@ -33,6 +34,7 @@ class Result:
 def main(config: Config) -> Result:
     cmd = ["python", str(config.code_file)]
     try:
+        start_time = datetime.datetime.now()
         result = subprocess.run(
             cmd,
             timeout=config.time / 1000,
@@ -42,6 +44,10 @@ def main(config: Config) -> Result:
             text=True,
             encoding="utf-8",
         )
+        end_time = datetime.datetime.now()
+
+        elapsed_time = end_time - start_time 
+
 
     except subprocess.TimeoutExpired as e:
         return Result(
@@ -64,7 +70,7 @@ def main(config: Config) -> Result:
         stdout=result.stdout,
         stderr=result.stderr,
         status="OK",
-        time=0.0,
+        time=elapsed_time.total_seconds(),
         memory=0.0,
     )
 
