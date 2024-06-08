@@ -1,5 +1,6 @@
+import SubmissionResult from './SubmissionResult';
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link, useParams, useNavigate } from 'react-router-dom';
 import { Container, Button, Typography, Box, List, ListItem, ListItemText, Drawer, ListItemButton, AppBar, Toolbar, CssBaseline, IconButton, Divider } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -11,6 +12,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight';
+
 
 // カスタムテーマの作成
 const theme = createTheme({
@@ -57,6 +59,7 @@ const theme = createTheme({
   },
 });
 
+
 function ProblemList({ onClose }) {
   const [problems, setProblems] = useState([]);
 
@@ -88,6 +91,7 @@ function ProblemList({ onClose }) {
 
 function ProblemDetail() {
   const { problemName } = useParams();
+  const navigate = useNavigate();
   const [problemSummary, setProblemSummary] = useState({});
   const [problemConstraint, setProblemConstraint] = useState({});
   const [problemContent, setProblemContent] = useState('');
@@ -111,7 +115,13 @@ function ProblemDetail() {
 
   const handleCodeSubmit = async () => {
     try {
-      await axios.post('http://localhost:8000/submit', { code });
+      const response = await axios.post(`http://localhost:8000/submit/${problemName}`, {
+        code: code,
+        username: 'testuser',
+      });
+      const id = response.data.task_id;
+      console.log(`Submitted! Task ID: ${id}`);
+      navigate(`/result/${id}`);
     } catch (error) {
       console.error("There was an error submitting the code!", error);
     }
@@ -166,7 +176,7 @@ function ProblemDetail() {
           }}
         ></div>
         <Button variant="contained" color="primary" onClick={handleCodeSubmit} style={{ marginTop: '20px' }}>
-          Submit Code
+          Submit !
         </Button>
       </Box>
     </Container>
@@ -202,13 +212,28 @@ function Welcome() {
       </Typography>
 
       <Typography variant="body1" component="pre" gutterBottom>
-        Python 3.12.0
+        Python 3.11
         <br />
         numpy==1.26.4
         <br />
         torch==2.3.0
         <br />
         scikit-learn==1.5.0
+      </Typography>
+
+      <Typography variant="h4" component="h2" gutterBottom>
+        &gt; Note
+      </Typography>
+
+      <Typography variant="body1" gutterBottom>
+        時間の計測はやや適当に実装されています。 正確にベンチマークしたい場合は手元で実行してください。 
+        <br />
+
+        システムへの攻撃は禁止です。問題を解く際には他の参加者に迷惑をかけないようにしてください。
+
+        <br />
+
+        (迷惑をかけずに脆弱性を見つけたい人は大歓迎なので @abap34 まで連絡してください。 Repository に招待します。)
       </Typography>
 
     </Container>
@@ -267,6 +292,7 @@ function App() {
             <Toolbar />
             <Routes>
               <Route path="/problems/:problemName" element={<ProblemDetail />} />
+              <Route path="/result/:taskId" element={<SubmissionResult />} />
               <Route path="/" element={<Welcome />} />
             </Routes>
           </Box>
