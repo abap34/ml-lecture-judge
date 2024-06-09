@@ -2,14 +2,25 @@ import argparse
 from dataclasses import dataclass
 from pathlib import Path
 import subprocess
-import os
-
 import datetime
 from typing import Literal
 from dataclasses import dataclass
 import json
 from pathlib import Path
+import logging
 
+logging.basicConfig(
+    level=logging.DEBUG,  
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        # logging.FileHandler("/app/logs/debug.log"),
+        logging.StreamHandler() 
+    ]
+)
+
+logger = logging.getLogger(__name__)
+# debug も出力するように設定
+logger.setLevel(logging.DEBUG)
 
 @dataclass
 class Config:
@@ -30,17 +41,19 @@ class Result:
 
 
 def main(config: Config) -> Result:
-    cmd = ["python", str(config.code_file)]
-    print("This is executor.py...")
-    print("cmd: ", cmd)
+    logger.debug("This is executor.py...")
+
+    cmd = ["python3", str(config.code_file)]
+
+    logger.debug("cmd: %s", cmd)
+
     try:
         start_time = datetime.datetime.now()
-        print("start_time: ", start_time)
-        print("start execution with: ")
-        print("input:\n", config.input_file.read_text())
-        print()
-        print("code:\n", config.code_file.read_text())
-        print("timeout: ", config.time / 1000)
+        logger.debug("start_time: %s", start_time)
+        logger.debug("start execution with:")
+        logger.debug("input:\n%s", config.input_file.read_text())
+        logger.debug("code:\n%s", config.code_file.read_text())
+        logger.debug("timeout: %s", config.time / 1000)
 
         result = subprocess.run(
             cmd,
@@ -51,17 +64,17 @@ def main(config: Config) -> Result:
             text=True,
             encoding="utf-8",
         )
-        
-        print("Finished execution Successfully")
-        print("stdout: ", result.stdout)
-        print("stderr: ", result.stderr)
-        end_time = datetime.datetime.now()
 
+        logger.debug("Finished execution Successfully")
+        logger.debug("stdout: %s", result.stdout)
+        logger.debug("stderr: %s", result.stderr)
+        end_time = datetime.datetime.now()
+        
         elapsed_time = end_time - start_time 
 
 
     except subprocess.TimeoutExpired as e:
-        print("TimeoutExpired")
+        logger.debug("TimeoutExpired!", exc_info=e, stack_info=True, extra={"stdout": e.stdout, "stderr": e.stderr})
         return Result(
             stdout=e.stdout,
             stderr=e.stderr,
@@ -69,8 +82,7 @@ def main(config: Config) -> Result:
             time=e.timeout,
         )
     except subprocess.CalledProcessError as e:
-        print("CalledProcessError!")
-        print(e)
+        logger.debug("CalledProcessError!", exc_info=e, stack_info=True, extra={"stdout": e.stdout, "stderr": e.stderr})
         return Result(
             stdout=e.stdout,
             stderr=e.stderr,
@@ -78,8 +90,7 @@ def main(config: Config) -> Result:
             time=0.0,
         )
     except Exception as e:
-        print("Unexpected Error!")
-        print(e)
+        logger.debug("Unexpected Error!", exc_info=e, stack_info=True)
         return Result(
             stdout="",
             stderr=str(e),

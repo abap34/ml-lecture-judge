@@ -4,11 +4,22 @@ from fastapi.middleware.cors import CORSMiddleware
 import yaml
 import glob
 import uvicorn
-from typing import Generator
-
 from judge.tasks import evaluate_code
 import sqlite3
 from db import add_submission, update_submission, get_submission, init_db
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        # logging.FileHandler("/app/logs/debug.log"),
+        logging.StreamHandler(),
+    ],
+)
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 app = FastAPI()
 
@@ -25,9 +36,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 def n_testcases(problem_name: str) -> int:
     inputs = glob.glob(f"static/problems/{problem_name}/in/*.in")
     return len(inputs)
+
 
 def get_all_testcases(problem_name: str) -> list[tuple[str, str]]:
     inputs = glob.glob(f"static/problems/{problem_name}/in/*.in")
@@ -65,6 +78,7 @@ async def submit_code(request: Request):
     )
     return {"task_id": task.id, "status": "Submitted"}
 
+
 # 注意！！！！！！　dbのすべてをリセットするエンドポイントが必要
 @app.get("/reset_db/are_you_sure")
 def reset_db():
@@ -79,7 +93,6 @@ def reset_db():
     init_db()
     return {"status": "OK"}
 
-    
 
 @app.get("/result/{task_id}")
 def get_result(task_id: str):
@@ -144,4 +157,10 @@ def get_jobs():
 
 
 if __name__ == "__main__":
+    logging.debug("------------------------------------------------")
+    logging.debug(
+        "Up backend server at %s", datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    )
+    logging.debug("------------------------------------------------")
+
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
