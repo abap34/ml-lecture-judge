@@ -80,9 +80,9 @@ def run(code: str, input_data: str, timelimit: int, memorylimit: int) -> Executi
 
     client = docker.from_env()
     try:
-        # CPU使用率 max 20% にする
+        # CPU使用率 max 45% にする
         cpu_period = 100000
-        cpu_quota = int(cpu_period * 0.2)
+        cpu_quota = int(cpu_period * 0.45)
 
 
         log = client.containers.run(
