@@ -7,19 +7,6 @@ import docker
 from celery import Celery
 from typing import Literal
 import docker.types
-import logging
-
-logging.basicConfig(
-    level=logging.DEBUG,  
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        # logging.FileHandler("/app/logs/debug.log"), 
-        logging.StreamHandler()
-    ]
-)
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 
@@ -82,8 +69,6 @@ def build_command(code, input_data, time):
         ]
     )
 
-    logger.debug("cmd: %s", cmd)
-
     return cmd
 
 # コンテナ内で実行
@@ -92,7 +77,6 @@ def build_command(code, input_data, time):
 # timelimit: int  時間制限 (ms)
 # memorylimit: int  メモリ制限 (MB)
 def run(code: str, input_data: str, timelimit: int, memorylimit: int) -> ExecutionResult:
-    logger.debug("This is run function...")
 
     client = docker.from_env()
     try:
@@ -100,8 +84,6 @@ def run(code: str, input_data: str, timelimit: int, memorylimit: int) -> Executi
         cpu_period = 100000
         cpu_quota = int(cpu_period * 0.2)
 
-        logger.debug("timelimit: %s", timelimit)
-        logger.debug("memorylimit: %s", memorylimit)
 
         log = client.containers.run(
             image="executor",
@@ -117,11 +99,9 @@ def run(code: str, input_data: str, timelimit: int, memorylimit: int) -> Executi
         stdout = log.decode("utf-8")
 
         try:
-            logger.debug("Parsing the result...")
             return ExecutionResult.from_json(json.loads(stdout))
 
         except json.JSONDecodeError:
-            logger.debug("Failed to parse the result. value: %s", stdout)
             return ExecutionResult(
                 stdout="",
                 stderr="Failed to parse the result. value: " + stdout,
@@ -132,7 +112,6 @@ def run(code: str, input_data: str, timelimit: int, memorylimit: int) -> Executi
 
     # 時間制限
     except docker.errors.ContainerError as e:
-        logger.debug("ContainerError!", exc_info=e, stack_info=True)
         return ExecutionResult(
             stdout=e.stderr.decode("utf-8"),
             stderr="",
@@ -143,7 +122,6 @@ def run(code: str, input_data: str, timelimit: int, memorylimit: int) -> Executi
 
     # メモリ制限
     except docker.errors.APIError as e:
-        logger.debug("APIError!", exc_info=e, stack_info=True)
         return ExecutionResult(
             stdout="",
             stderr=str(e),
@@ -154,7 +132,6 @@ def run(code: str, input_data: str, timelimit: int, memorylimit: int) -> Executi
 
     # 　予期せぬそのほかのエラー (ランタイムエラーは含まれない！. REは executor.py で処理される)
     except Exception as e:
-        logger.debug("Unexpected error!", exc_info=e, stack_info=True)
         return ExecutionResult(
             stdout="",
             stderr=str(e),
@@ -193,10 +170,7 @@ def evaluate_code(code: str, testcases: list[tuple[str, str]], timelimit: float,
     
     max_time = -1
     for i, (input_data, output_data) in enumerate(testcases):
-        logger.debug(f"Case {i}: {input_data}  -> {output_data}")
-
-
-        # 実行！
+        # 実行
         result: ExecutionResult = run(code, input_data=input_data, timelimit=timelimit, memorylimit=memorylimit)
         status: ExecutionStatus = result.status
 
@@ -207,28 +181,17 @@ def evaluate_code(code: str, testcases: list[tuple[str, str]], timelimit: float,
                 time=result.time,
                 pass_cases=i,
             ).to_dict()
-        
-        # ジャッジ. ここもノックアウトする
 
         max_time = max(max_time, result.time)
 
         # ジャッジ. ここはノックアウトしないことに注意
         if result.stdout.strip() != output_data.strip():
-            return Judgement(
-                status="WA",
-                time=result.time,
-                pass_cases=i,
-            ).to_dict()
             ng_cases += 1
         else:
             ok_cases += 1
         
 
-    return Judgement(
-        status="AC",
-        time=result.time,
-        pass_cases=i,
-    ).to_dict()    if ng_cases == 0:
+    if ng_cases == 0:
         return Judgement(
             status="AC",
             time=max_time,
