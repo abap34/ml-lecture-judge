@@ -18,6 +18,9 @@ services:
       - data:/app/data
     depends_on:
       - redis
+      - backend 
+    environment:
+      - PYTHONUNBUFFERED=1
     
   flower:
     build:
@@ -47,6 +50,7 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - PYTHONUNBUFFERED=1
 
   front:
     build:
@@ -58,12 +62,6 @@ services:
       - ./front:/app  
     depends_on:
       - backend
-
-  executor:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.executor
-    # tty: true
 
 volumes:
   data:
