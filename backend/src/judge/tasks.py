@@ -78,7 +78,7 @@ def build_command(code, input_data, time):
         [
             "/bin/sh",
             "-c",
-            f"echo {code} > code.py && echo {input_data} > input.txt && python3 /app/executor.py --code code.py --input input.txt --time {time}",
+            f"echo {code} > target_code.py && echo {input_data} > input.txt && python3 /app/executor.py --code target_code.py --input input.txt --time {time}",
         ]
     )
 
@@ -96,17 +96,20 @@ def run(code: str, input_data: str, timelimit: int, memorylimit: int) -> Executi
 
     client = docker.from_env()
     try:
-        # CPU使用率 20% 
+        # CPU使用率 max 20% にする
+        cpu_period = 100000
+        cpu_quota = int(cpu_period * 0.2)
+
         logger.debug("timelimit: %s", timelimit)
         logger.debug("memorylimit: %s", memorylimit)
 
         log = client.containers.run(
             image="executor",
             command=build_command(code, input_data, timelimit),
-            # cpu_quota=cpu_quota,
-            # cpu_period=cpu_period,
-            # mem_limit=f"{memorylimit}m",
-            # pids_limit=64,
+            cpu_quota=cpu_quota,
+            cpu_period=cpu_period,
+            mem_limit=f"{memorylimit}m",
+            pids_limit=64,
             stdout=True,
             stderr=True,
         )
