@@ -16,7 +16,6 @@ class Config:
     code_file: Path
     input_file: Path
     time: float
-    memory: float
 
 
 @dataclass
@@ -25,7 +24,6 @@ class Result:
     stderr: str
     status: Literal["OK", "RE", "TLE", "MLE", "IE"]
     time: float
-    memory: float
 
     def to_json(self):
         return json.dumps(self.__dict__)
@@ -33,8 +31,17 @@ class Result:
 
 def main(config: Config) -> Result:
     cmd = ["python", str(config.code_file)]
+    print("This is executor.py...")
+    print("cmd: ", cmd)
     try:
         start_time = datetime.datetime.now()
+        print("start_time: ", start_time)
+        print("start execution with: ")
+        print("input:\n", config.input_file.read_text())
+        print()
+        print("code:\n", config.code_file.read_text())
+        print("timeout: ", config.time / 1000)
+
         result = subprocess.run(
             cmd,
             timeout=config.time / 1000,
@@ -44,26 +51,40 @@ def main(config: Config) -> Result:
             text=True,
             encoding="utf-8",
         )
+        
+        print("Finished execution Successfully")
+        print("stdout: ", result.stdout)
+        print("stderr: ", result.stderr)
         end_time = datetime.datetime.now()
 
         elapsed_time = end_time - start_time 
 
 
     except subprocess.TimeoutExpired as e:
+        print("TimeoutExpired")
         return Result(
-            stdout="",
-            stderr="",
+            stdout=e.stdout,
+            stderr=e.stderr,
             status="TLE",
             time=e.timeout,
-            memory=0.0,
         )
     except subprocess.CalledProcessError as e:
+        print("CalledProcessError!")
+        print(e)
         return Result(
-            stdout="",
+            stdout=e.stdout,
             stderr=e.stderr,
             status="RE",
             time=0.0,
-            memory=0.0,
+        )
+    except Exception as e:
+        print("Unexpected Error!")
+        print(e)
+        return Result(
+            stdout="",
+            stderr=str(e),
+            status="IE",
+            time=0.0,
         )
 
     return Result(
@@ -71,7 +92,6 @@ def main(config: Config) -> Result:
         stderr=result.stderr,
         status="OK",
         time=elapsed_time.total_seconds(),
-        memory=0.0,
     )
 
 
@@ -86,7 +106,6 @@ if __name__ == "__main__":
         code_file=Path(args.code),
         input_file=Path(args.input),
         time=args.time,
-        memory=256.0,
     )
 
     result = main(config)
