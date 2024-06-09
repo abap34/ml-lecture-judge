@@ -6,6 +6,6 @@ summary:
 # 制約
 constraints:
   # 実行時間制限 (ミリ秒)
-  time: 4000
+  time: 12000
   # メモリ制限 (MB)
   memory: 2048
