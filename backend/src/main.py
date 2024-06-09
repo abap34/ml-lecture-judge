@@ -32,10 +32,12 @@ def n_testcases(problem_name: str) -> int:
 
 def get_all_testcases(problem_name: str) -> list[tuple[str, str]]:
     inputs = glob.glob(f"static/problems/{problem_name}/in/*.in")
-    outputs = glob.glob(f"static/problems/{problem_name}/out/*.out")
     testcases = [
-        (open(input_file).read(), open(output_file).read())
-        for input_file, output_file in zip(inputs, outputs)
+        (
+            open(input_file).read(),
+            open(input_file.replace("/in/", "/out/").replace(".in", ".out")).read(),
+        )
+        for input_file in inputs
     ]
     return testcases
 
