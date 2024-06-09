@@ -65,10 +65,9 @@ def generate_testcases(problem_name: str):
     print(f"Generating testcases for {problem_name}. {len(inputs)} testcases found")
 
     for input_file in inputs:
-        print(f"Generating testcase for {input_file}")
         output_file = input_file.replace("/in/", "/out/").replace(".in", ".out")
-
-        os.system(f"python problems/{problem_name}/solution.py < {input_file} > {output_file}")
+        print(f"Generating testcase for {input_file} -> {output_file}")
+        os.system(f"python3 problems/{problem_name}/solution.py < {input_file} > {output_file}")
 
     print("Testcases generated")
 
@@ -127,7 +126,7 @@ def main():
     if args.command == "gen":
         generate_problem(args.problem_name)
     elif args.command == "genout":
-        generate_testcases(args.problem_name, pathlib.Path(args.solution))
+        generate_testcases(args.problem_name)
     elif args.command == "check":
         check_problem(args.problem_name)
     else:
