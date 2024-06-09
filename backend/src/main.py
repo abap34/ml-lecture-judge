@@ -7,19 +7,7 @@ import uvicorn
 from judge.tasks import evaluate_code
 import sqlite3
 from db import add_submission, update_submission, get_submission, init_db
-import logging
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        # logging.FileHandler("/app/logs/debug.log"),
-        logging.StreamHandler(),
-    ],
-)
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 app = FastAPI()
 
@@ -98,8 +86,9 @@ def reset_db():
 def get_result(task_id: str):
     task = evaluate_code.AsyncResult(task_id)
     if task.ready():
-        # db を更新
-        update_submission(task_id, task.get()["status"], task.get()["time"])
+        # 考え直した方がいいかも ?
+        # -> このタイミングで db 更新
+        update_submission(task_id, task.get()["status"], task.get()["time"], task.get()["pass_cases"])
         submit = get_submission(task_id)
         return {
             "status": "Completed",
@@ -157,10 +146,4 @@ def get_jobs():
 
 
 if __name__ == "__main__":
-    logging.debug("------------------------------------------------")
-    logging.debug(
-        "Up backend server at %s", datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    )
-    logging.debug("------------------------------------------------")
-
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
