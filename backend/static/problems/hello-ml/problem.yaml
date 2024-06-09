@@ -4,8 +4,8 @@ summary:
   points: 100
   
 # 制約
-constraint:
+constraints:
   # 実行時間制限 (ミリ秒)
-  time: 2000
+  time: 4000
   # メモリ制限 (MB)
-  memory: 128
+  memory: 2048

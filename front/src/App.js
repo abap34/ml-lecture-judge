@@ -93,7 +93,7 @@ function ProblemDetail() {
   const { problemName } = useParams();
   const navigate = useNavigate();
   const [problemSummary, setProblemSummary] = useState({});
-  const [problemConstraint, setProblemConstraint] = useState({});
+  const [problemConstraints, setProblemConstraints] = useState({});
   const [problemContent, setProblemContent] = useState('');
   const [code, setCode] = useState('');
 
@@ -103,7 +103,7 @@ function ProblemDetail() {
         const response = await axios.get(`http://localhost:8000/problems/${problemName}`);
         const data = response.data.problem;
         setProblemSummary(data.summary);
-        setProblemConstraint(data.constraint);
+        setProblemConstraints(data.constraints);
         setProblemContent(response.data.description);
       } catch (error) {
         console.error('There was an error fetching the problem content!', error);
@@ -118,6 +118,7 @@ function ProblemDetail() {
       const response = await axios.post(`http://localhost:8000/submit/${problemName}`, {
         code: code,
         username: 'testuser',
+        problem_name: problemName,
       });
       const id = response.data.task_id;
       console.log(`Submitted! Task ID: ${id}`);
@@ -155,8 +156,8 @@ function ProblemDetail() {
 
       <Box display="flex" justifyContent="flex-start" mb={2}>
         <Typography variant="body1" sx={{ marginRight: 2 }}>Points: {problemSummary.points}</Typography>
-        <Typography variant="body1" sx={{ marginRight: 2 }}>Time Limit: {problemConstraint.time} [ms] </Typography>
-        <Typography variant="body1">Memory Limit: {problemConstraint.memory} [MB] </Typography>
+        <Typography variant="body1" sx={{ marginRight: 2 }}>Time Limit: {problemConstraints.time} [ms] </Typography>
+        <Typography variant="body1">Memory Limit: {problemConstraints.memory} [MB] </Typography>
       </Box>
 
       <Divider />
