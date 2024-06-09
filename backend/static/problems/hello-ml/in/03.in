@@ -1,0 +1,2 @@
+lambda x: torch.sin(torch.exp(x)) * 2
+4
