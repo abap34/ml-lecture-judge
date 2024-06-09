@@ -188,6 +188,10 @@ class Judgement:
 
 @app.task(name="tasks.evaluate_code")
 def evaluate_code(code: str, testcases: list[tuple[str, str]], timelimit: float, memorylimit: float) -> Judgement:
+    ng_cases = 0
+    ok_cases = 0
+    
+    max_time = -1
     for i, (input_data, output_data) in enumerate(testcases):
         logger.debug(f"Case {i}: {input_data}  -> {output_data}")
 
@@ -205,16 +209,34 @@ def evaluate_code(code: str, testcases: list[tuple[str, str]], timelimit: float,
             ).to_dict()
         
         # ジャッジ. ここもノックアウトする
+
+        max_time = max(max_time, result.time)
+
+        # ジャッジ. ここはノックアウトしないことに注意
         if result.stdout.strip() != output_data.strip():
             return Judgement(
                 status="WA",
                 time=result.time,
                 pass_cases=i,
             ).to_dict()
+            ng_cases += 1
+        else:
+            ok_cases += 1
         
 
     return Judgement(
         status="AC",
         time=result.time,
         pass_cases=i,
-    ).to_dict()
+    ).to_dict()    if ng_cases == 0:
+        return Judgement(
+            status="AC",
+            time=max_time,
+            pass_cases=ok_cases
+        ).to_dict()
+    else:
+        return Judgement(
+            status="WA",
+            time=max_time,
+            pass_cases=ok_cases
+        ).to_dict()
