@@ -18,7 +18,7 @@ x
 
 - $f$ は $x$ に対する関数 $f(x)$ を表す式で、
   ```python3
-  f = lambda x: {xの式}
+  lambda x: {xの式}
   ```
 
   という形で書かれています。ここで `{xの式}` は PyTorch でサポートされている関数のみからなります。
@@ -26,7 +26,7 @@ x
   したがって、以下のようなコードで $f$ を定義することができます。
 
   ```python3
-  f = eval(input())
+  eval(input())
   ```
 
 ## 出力
@@ -43,7 +43,7 @@ $f'(x)$ の値を小数点以下3桁まで出力してください。
 
 #### 入力
 ```plaintext
-f = lambda x: x**2
+lambda x: x**2
 1.0
 ```
 
@@ -56,7 +56,7 @@ f = lambda x: x**2
 
 #### 入力
 ```plaintext
-f = lambda x: torch.cos(x * 3.14159265358979323846)
+lambda x: torch.cos(x * 3.14159265358979323846)
 0.0
 ```
 
