@@ -5,7 +5,7 @@ import subprocess
 from datetime import datetime
 import docker
 from celery import Celery
-from typing import Literal
+from typing import Literal, Union
 import docker.types
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
@@ -71,12 +71,15 @@ def build_command(code, input_data, time):
 
     return cmd
 
+
 # コンテナ内で実行
 # code: str  実行するコード
 # input_data: str  標準入力
 # timelimit: int  時間制限 (ms)
 # memorylimit: int  メモリ制限 (MB)
-def run(code: str, input_data: str, timelimit: int, memorylimit: int) -> ExecutionResult:
+def run(
+    code: str, input_data: str, timelimit: int, memorylimit: int
+) -> ExecutionResult:
 
     client = docker.from_env()
     try:
@@ -136,8 +139,8 @@ def run(code: str, input_data: str, timelimit: int, memorylimit: int) -> Executi
         client.close()
 
 
-
 JudgeResult = Literal["WJ", "AC", "WA", "RE", "TLE", "MLE", "IE"]
+
 
 class Judgement:
     def __init__(self, status: JudgeResult, time: float, pass_cases: int):
@@ -156,15 +159,65 @@ class Judgement:
         return json.dumps(self.to_dict())
 
 
+def passed(
+    output: str,
+    expected: str,
+    error_judge: bool,
+    abs_error: Union[float, None],
+    rel_error: Union[float, None],
+) -> bool:
+    if error_judge:
+        try:
+            output_float = float(output)
+            expected_float = float(expected)
+            # 絶対誤差が abs_error 以下なら ok
+            if abs(output_float - expected_float) <= abs_error:
+                return True
+
+            # 相対誤差が rel_error 以下なら ok
+            if expected_float == 0:
+                if output_float == 0:
+                    return True
+                else:
+                    return False
+            else:
+                if abs((output_float - expected_float) / expected_float) <= rel_error:
+                    return True
+
+            return False
+        except ValueError:
+            # 出力が不正.
+            return False
+    else:
+        # 通常のジャッジ
+        return output == expected
+
+
 @app.task(name="tasks.evaluate_code")
-def evaluate_code(code: str, testcases: list[tuple[str, str]], timelimit: float, memorylimit: float) -> Judgement:
+def evaluate_code(
+    code: str,
+    testcases: list[tuple[str, str]],
+    timelimit: float,
+    memorylimit: float,
+    error_judge: bool = False,
+    abs_error: Union[float, None] = None,
+    rel_error: Union[float, None] = None,
+) -> dict:
+    # 誤差ジャッジするなら abs_error と rel_error はどちらも指定されている必要がある
+    if error_judge and (abs_error is None or rel_error is None):
+        raise ValueError(
+            "abs_error and rel_error must be specified when error_judge is True"
+        )
+
     ng_cases = 0
     ok_cases = 0
-    
+
     max_time = -1
     for i, (input_data, output_data) in enumerate(testcases):
         # 実行
-        result: ExecutionResult = run(code, input_data=input_data, timelimit=timelimit, memorylimit=memorylimit)
+        result: ExecutionResult = run(
+            code, input_data=input_data, timelimit=timelimit, memorylimit=memorylimit
+        )
         status: ExecutionStatus = result.status
 
         # ノックアウトする
@@ -178,21 +231,14 @@ def evaluate_code(code: str, testcases: list[tuple[str, str]], timelimit: float,
         max_time = max(max_time, result.time)
 
         # ジャッジ. ここはノックアウトしないことに注意
-        if result.stdout.strip() != output_data.strip():
-            ng_cases += 1
-        else:
+        # 誤差ジャッジなら floatで読んで誤差ジャッジする.
+        # 出力が不正なら WA
+        if passed(result.stdout, output_data, error_judge, abs_error, rel_error):
             ok_cases += 1
-        
+        else:
+            ng_cases += 1
 
     if ng_cases == 0:
-        return Judgement(
-            status="AC",
-            time=max_time,
-            pass_cases=ok_cases
-        ).to_dict()
+        return Judgement(status="AC", time=max_time, pass_cases=ok_cases).to_dict()
     else:
-        return Judgement(
-            status="WA",
-            time=max_time,
-            pass_cases=ok_cases
-        ).to_dict()
+        return Judgement(status="WA", time=max_time, pass_cases=ok_cases).to_dict()

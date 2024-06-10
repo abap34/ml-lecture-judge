@@ -58,10 +58,26 @@ async def submit_code(request: Request):
     constraints = get_constraints(problem_name)
     timelimit = constraints["time"]
     memorylimit = constraints["memory"]
+    error_judge = constraints.get("error_judge", False)
 
-    task = evaluate_code.delay(
-        code, get_all_testcases(problem_name), timelimit, memorylimit
-    )
+    if error_judge:
+        abs_error = float(constraints.get("absolute_error", None))
+        rel_error = float(constraints.get("relative_error", None))
+
+        task = evaluate_code.delay(
+            code,
+            get_all_testcases(problem_name),
+            timelimit,
+            memorylimit,
+            error_judge,
+            abs_error,
+            rel_error,
+        )
+    else:
+        task = evaluate_code.delay(
+            code, get_all_testcases(problem_name), timelimit, memorylimit
+        )
+
     # 投稿した瞬間は WJ
     add_submission(
         task.id, problem_name, username, code, "WJ", execution_time=None, team_id=None
@@ -90,7 +106,9 @@ def get_result(task_id: str):
     if task.ready():
         # 考え直した方がいいかも ?
         # -> このタイミングで db 更新
-        update_submission(task_id, task.get()["status"], task.get()["time"], task.get()["pass_cases"])
+        update_submission(
+            task_id, task.get()["status"], task.get()["time"], task.get()["pass_cases"]
+        )
         submit = get_submission(task_id)
         return {
             "status": "Completed",
