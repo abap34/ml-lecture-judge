@@ -13,15 +13,21 @@ CONFIG = {"summary": ["title", "points"], "constraint": ["time", "memory"]}
 PROBLEM_TEMPLATE = """\
 # 概要
 summary: 
-  title: 
-  points: 
+  title: Hello, AutoGrad!
+  points: 100
   
 # 制約
-constraint:
+constraints:
   # 実行時間制限 (ミリ秒)
   time: 
   # メモリ制限 (MB)
   memory: 
+  # 誤差ジャッジをするか？
+  error_judge: 
+  # 許容絶対誤差
+  absolute_error: 
+  # 許容相対誤差
+  relative_error: 
 """
 
 
