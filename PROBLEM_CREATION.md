@@ -83,7 +83,12 @@ markdown で記述してください。
 制約はあまり厳しくしないでください。
 (手元実行の4倍くらいは確保しておいた方が良さそうです)
 
+誤差ジャッジをしたい場合、　`error_judge` を `true` にして、許容誤差を設定してください。
+
+想定解および真の値を `float` として読み、その絶対誤差または相対誤差が設定された誤差以下であれば正解になります。
+
 ```yaml
+# 概要
 # 概要
 summary: 
   title: Hello, AutoGrad!
@@ -95,6 +100,12 @@ constraints:
   time: 2000
   # メモリ制限 (MB)
   memory: 256
+  # 誤差ジャッジをするか？
+  error_judge: true
+  # 許容絶対誤差
+  absolute_error: 1e-5
+  # 許容相対誤差
+  relative_error: 1e-5
 ```
 
 
