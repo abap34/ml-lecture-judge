@@ -61,22 +61,23 @@
 
 ### セットアップ
 
-`backend/src/judge/requirements.txt` にユーザが使っていいライブラリを追加する。
+#### 実行環境のセットアップ
+
+`backend/Docker.executor` が実際に実行に使うコンテナ。
+ここで必要なパッケージのセットアップをする。
+
+#### 問題の作成
+
+`PROBLEM_CREATION.md` を参考に問題を作成する。
 
 
-問題を追加する。
+### 最初にすること
 
 ```bash
-$ python3 problems/helper.py gen {problem_name}
+$ chmod +x build.sh
+$ cd front
+$ npm install
 ```
-
-で問題の雛形を生成する。 input, solution, output を記述する。
-
-```bash
-$ python3 problems/helper.py genout {problem_name}
-```
-
-で出力を生成する。
 
 
 ### ビルド
