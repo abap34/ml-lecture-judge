@@ -210,7 +210,7 @@ def passed(
 @app.task(name="tasks.evaluate_code")
 def evaluate_code(
     code: str,
-    testcases: list[tuple[str, str]],
+    testcases: list[dict[str, str]],
     timelimit: float,
     memorylimit: float,
     error_judge: bool = False,
@@ -227,7 +227,9 @@ def evaluate_code(
     ok_cases = 0
 
     max_time = -1
-    for i, (input_data, output_data) in enumerate(testcases):
+    for i, testcase in enumerate(testcases):
+        input_data = testcase["input"]
+        output_data = testcase["output"]
         # 実行
         result: ExecutionResult = run(
             code, input_data=input_data, timelimit=timelimit, memorylimit=memorylimit
@@ -236,6 +238,10 @@ def evaluate_code(
 
         # ノックアウトする
         if status != "OK":
+            print(
+                "Error occured while running the code. status: ",
+                result.to_json()
+            )
             return Judgement(
                 status=status,
                 time=result.time,
