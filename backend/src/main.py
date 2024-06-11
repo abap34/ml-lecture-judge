@@ -26,6 +26,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 def get_db():
     db = SessionLocal()
     try:
@@ -33,25 +34,33 @@ def get_db():
     finally:
         db.close()
 
+
 def n_testcases(problem_name: str) -> int:
     inputs = glob.glob(f"static/problems/{problem_name}/in/*.in")
     return len(inputs)
+
 
 def get_all_testcases(problem_name: str) -> List[Dict[str, str]]:
     inputs = glob.glob(f"static/problems/{problem_name}/in/*.in")
     testcases = [
         {
             "input": open(input_file).read(),
-            "output": open(input_file.replace("/in/", "/out/").replace(".in", ".out")).read(),
+            "output": open(input_file.replace("/in/", "/out/").replace(".in", ".out") ).read(),
         }
         for input_file in inputs
     ]
+    print(
+        "testcases: ",
+        testcases
+    )
     return testcases
+
 
 def get_constraints(problem_name: str) -> Dict[str, any]:
     with open(f"static/problems/{problem_name}/problem.yaml") as f:
         problem = yaml.safe_load(f)
     return problem["constraints"]
+
 
 @app.post("/submit/{problem_name}")
 async def submit_code(request: CodeSubmission, db: Session = Depends(get_db)):
@@ -75,38 +84,63 @@ async def submit_code(request: CodeSubmission, db: Session = Depends(get_db)):
         )
     else:
         task = evaluate_code.delay(
-            request.code, get_all_testcases(request.problem_name), timelimit, memorylimit
+            request.code,
+            get_all_testcases(request.problem_name),
+            timelimit,
+            memorylimit,
         )
 
-    add_submission(db, task.id, request.problem_name, request.userid, request.code, "WJ", execution_time=None, team_id=None)
+    add_submission(
+        db,
+        task.id,
+        request.problem_name,
+        request.userid,
+        request.code,
+        "WJ",
+        execution_time=None,
+        team_id=None,
+    )
     return {"task_id": task.id, "status": "Submitted"}
+
 
 @app.get("/reset_db/are_you_sure")
 def reset_db():
     init_db()
     return {"status": "OK"}
 
+
 @app.get("/result/{task_id}", response_model=SubmissionResult)
 def get_result(task_id: str, db: Session = Depends(get_db)):
     task = evaluate_code.AsyncResult(task_id)
     if task.ready():
         result = task.get()
-        update_submission(db, task_id, status=result.status, execution_time=result.time, pass_cases=result.pass_cases)
+
+        update_submission(
+            db,
+            task_id,
+            status=result["status"],
+            execution_time=result["time"],
+            pass_cases=result["pass_cases"],
+        )
         try:
             submit = get_submission(db, task_id)
         except NoResultFound:
             raise HTTPException(status_code=404, detail="Submission not found")
-        return submit
-    else:
         return {
-            "problem_name": "",
-            "status": "Pending",
-            "execution_time": 0,
-            "code": "",
-            "passed_cases": 0,
-            "n_testcases": 0,
-            "submitted_at": datetime.now(),
+            "status": "Completed",
+            "result": {
+                "problem_name": submit.problem_name,
+                "status": submit.status,
+                "execution_time": submit.execution_time,
+                "code": submit.code,
+                "passed_cases": submit.pass_cases,
+                "n_testcases": n_testcases(submit.problem_name),
+                "submitted_at": submit.submitted_at,
+            },
         }
+    else:
+        return {"status": "Pending", "result": {}}
+
 
 @app.get("/problems", response_model=List[ProblemSummary])
 def get_problems():
@@ -125,6 +159,7 @@ def get_problems():
     ]
     return problems
 
+
 @app.get("/problems/{problem_name}", response_model=ProblemDetail)
 def get_problem(problem_name: str):
     try:
@@ -135,6 +170,7 @@ def get_problem(problem_name: str):
         return {"settings": problem, "description": description}
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Problem not found")
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)

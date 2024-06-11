@@ -58,17 +58,11 @@ class ProblemSummary(BaseModel):
     title: str
 
 
-class SubmissionResult(BaseModel):
-    problem_name: str
-    status: str
-    execution_time: Optional[float]
-    code: str
-    passed_cases: int
-    n_testcases: int
-    submitted_at: datetime
+JudgeQueueStatus = Literal["Pending", "Running", "Completed"]
 
-    class Config:
-        orm_mode = True
+class SubmissionResult(BaseModel):
+    status: JudgeQueueStatus
+    result: dict
 
 class ProblemDetail(BaseModel):
     settings: dict
