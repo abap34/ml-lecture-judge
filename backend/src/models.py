@@ -69,3 +69,10 @@ class SubmissionResult(BaseModel):
 
     class Config:
         orm_mode = True
+
+class ProblemDetail(BaseModel):
+    settings: dict
+    description: str
+
+    class Config:
+        orm_mode = True
