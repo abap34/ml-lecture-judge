@@ -10,7 +10,7 @@ function ProblemList({ onClose }) {
     const fetchProblems = async () => {
       try {
         const response = await axios.get('http://localhost:8000/problems');
-        setProblems(response.data.problems);
+        setProblems(response.data);
       } catch (error) {
         console.error('There was an error fetching the problems!', error);
       }
