@@ -20,6 +20,7 @@
     "react-markdown": "^9.0.1",
     "react-router-dom": "^6.23.1",
     "react-scripts": "5.0.1",
+    "react-spring": "^9.7.3",
     "rehype-highlight": "^7.0.0",
     "rehype-katex": "^7.0.0",
     "remark-math": "^6.0.0",
