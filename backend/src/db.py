@@ -19,7 +19,7 @@ def init_db():
 def add_submission(
     db: Session, submission_id: str, problem_name: str, user_id: int, code: str, status: str,
     execution_time: Optional[float] = None, team_id: Optional[int] = None, pass_cases: int = 0
-):
+) -> Submission:
     submission = Submission(
         id=submission_id,
         problem_name=problem_name,
