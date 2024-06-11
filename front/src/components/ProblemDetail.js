@@ -21,7 +21,7 @@ function ProblemDetail() {
     const fetchProblemContent = async () => {
       try {
         const response = await axios.get(`http://localhost:8000/problems/${problemName}`);
-        const data = response.data.problem;
+        const data = response.data.settings;
         setProblemSummary(data.summary);
         setProblemConstraints(data.constraints);
         setProblemContent(response.data.description);
