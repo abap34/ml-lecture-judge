@@ -37,7 +37,7 @@ function ProblemDetail() {
     try {
       const response = await axios.post(`http://localhost:8000/submit/${problemName}`, {
         code: code,
-        username: 'testuser',
+        userid: 'testuser',
         problem_name: problemName,
       });
       const id = response.data.task_id;
