@@ -2,6 +2,8 @@
 docker
 celery
 redis
+sqlalchemy
+pydantic
 fastapi
 flower
 uvicorn

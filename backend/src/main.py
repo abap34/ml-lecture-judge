@@ -1,13 +1,15 @@
 from datetime import datetime
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import NoResultFound
+from models import CodeSubmission, ProblemSummary, SubmissionResult
+from db import SessionLocal, init_db, add_submission, update_submission, get_submission
+from judge.tasks import evaluate_code
 import yaml
 import glob
 import uvicorn
-from judge.tasks import evaluate_code
-import sqlite3
-from db import add_submission, update_submission, get_submission, init_db
-
+from typing import List, Dict, Optional
 
 app = FastAPI()
 
@@ -24,38 +26,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 def n_testcases(problem_name: str) -> int:
     inputs = glob.glob(f"static/problems/{problem_name}/in/*.in")
     return len(inputs)
 
-
-def get_all_testcases(problem_name: str) -> list[tuple[str, str]]:
+def get_all_testcases(problem_name: str) -> List[Dict[str, str]]:
     inputs = glob.glob(f"static/problems/{problem_name}/in/*.in")
     testcases = [
-        (
-            open(input_file).read(),
-            open(input_file.replace("/in/", "/out/").replace(".in", ".out")).read(),
-        )
+        {
+            "input": open(input_file).read(),
+            "output": open(input_file.replace("/in/", "/out/").replace(".in", ".out")).read(),
+        }
         for input_file in inputs
     ]
     return testcases
 
-
-def get_constraints(problem_name: str) -> dict:
+def get_constraints(problem_name: str) -> Dict[str, any]:
     with open(f"static/problems/{problem_name}/problem.yaml") as f:
         problem = yaml.safe_load(f)
     return problem["constraints"]
 
-
 @app.post("/submit/{problem_name}")
-async def submit_code(request: Request):
-    data = await request.json()
-    code = data.get("code", "")
-    username = data.get("userid", "")
-    problem_name = data.get("problem_name", "")
-    # 制約取得
-    constraints = get_constraints(problem_name)
+async def submit_code(request: CodeSubmission, db: Session = Depends(get_db)):
+    constraints = get_constraints(request.problem_name)
     timelimit = constraints["time"]
     memorylimit = constraints["memory"]
     error_judge = constraints.get("error_judge", False)
@@ -65,8 +65,8 @@ async def submit_code(request: Request):
         rel_error = float(constraints.get("relative_error", None))
 
         task = evaluate_code.delay(
-            code,
-            get_all_testcases(problem_name),
+            request.code,
+            get_all_testcases(request.problem_name),
             timelimit,
             memorylimit,
             error_judge,
@@ -75,95 +75,66 @@ async def submit_code(request: Request):
         )
     else:
         task = evaluate_code.delay(
-            code, get_all_testcases(problem_name), timelimit, memorylimit
+            request.code, get_all_testcases(request.problem_name), timelimit, memorylimit
         )
 
-    # 投稿した瞬間は WJ
-    add_submission(
-        task.id, problem_name, username, code, "WJ", execution_time=None, team_id=None
-    )
+    add_submission(db, task.id, request.problem_name, request.userid, request.code, "WJ", execution_time=None, team_id=None)
     return {"task_id": task.id, "status": "Submitted"}
 
-
-# 注意！！！！！！　dbのすべてをリセットするエンドポイントが必要
 @app.get("/reset_db/are_you_sure")
 def reset_db():
-    c = sqlite3.connect("data/database.db")
-    # すべてのテーブルを削除
-    c.execute("DROP TABLE submissions")
-    c.execute("DROP TABLE users")
-    c.execute("DROP TABLE teams")
-    c.commit()
-    c.close()
-    # テーブルを再作成
     init_db()
     return {"status": "OK"}
 
-
-@app.get("/result/{task_id}")
-def get_result(task_id: str):
+@app.get("/result/{task_id}", response_model=SubmissionResult)
+def get_result(task_id: str, db: Session = Depends(get_db)):
     task = evaluate_code.AsyncResult(task_id)
     if task.ready():
-        # 考え直した方がいいかも ?
-        # -> このタイミングで db 更新
-        update_submission(
-            task_id, task.get()["status"], task.get()["time"], task.get()["pass_cases"]
-        )
-        submit = get_submission(task_id)
-        return {
-            "status": "Completed",
-            "result": {
-                "problem_name": submit["problem_name"],
-                "status": submit["status"],
-                "execution_time": submit["execution_time"],
-                "code": submit["code"],
-                "passed_cases": submit["pass_cases"],
-                "n_testcases": n_testcases(submit["problem_name"]),
-                "submitted_at": submit["submitted_at"],
-            },
-        }
+        result = task.get()
+        update_submission(db, task_id, status=result.status, execution_time=result.time, pass_cases=result.pass_cases)
+        try:
+            submit = get_submission(db, task_id)
+        except NoResultFound:
+            raise HTTPException(status_code=404, detail="Submission not found")
+        return submit
     else:
-        return {"status": "Pending"}
+        return {
+            "problem_name": "",
+            "status": "Pending",
+            "execution_time": 0,
+            "code": "",
+            "passed_cases": 0,
+            "n_testcases": 0,
+            "submitted_at": datetime.now(),
+        }
 
-
-# 全部の問題名を返す
-@app.get("/problems")
+@app.get("/problems", response_model=List[ProblemSummary])
 def get_problems():
     problems = glob.glob("static/problems/*")
-    # helper.py は除外してディレクトリ名だけを返す
     problems = [
         problem.split("/")[-1]
         for problem in problems
         if problem != "static/problems/helper.py"
     ]
-    # タイトルもとる
     problems = [
         {
             "name": problem,
-            "title": yaml.safe_load(open(f"static/problems/{problem}/problem.yaml"))[
-                "summary"
-            ]["title"],
+            "title": yaml.safe_load(open(f"static/problems/{problem}/problem.yaml"))["summary"]["title"],
         }
         for problem in problems
     ]
-    return {"problems": [problem for problem in problems]}
+    return problems
 
-
-# static/problems/{problem} 以下の内容を返す
-# 返すもの: problem.yaml description.md
 @app.get("/problems/{problem_name}")
 def get_problem(problem_name: str):
-    with open(f"static/problems/{problem_name}/problem.yaml") as f:
-        problem = yaml.safe_load(f)
-    with open(f"static/problems/{problem_name}/description.md") as f:
-        description = f.read()
-    return {"problem": problem, "description": description}
-
-
-@app.get("/jobs")
-def get_jobs():
-    return evaluate_code.control.inspect().active()
-
+    try:
+        with open(f"static/problems/{problem_name}/problem.yaml") as f:
+            problem = yaml.safe_load(f)
+        with open(f"static/problems/{problem_name}/description.md") as f:
+            description = f.read()
+        return {"problem": problem, "description": description}
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Problem not found")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
