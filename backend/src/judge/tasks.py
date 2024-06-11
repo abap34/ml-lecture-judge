@@ -168,23 +168,37 @@ def passed(
 ) -> bool:
     if error_judge:
         try:
-            output_float = float(output)
-            expected_float = float(expected)
-            # 絶対誤差が abs_error 以下なら ok
-            if abs(output_float - expected_float) <= abs_error:
-                return True
-
-            # 相対誤差が rel_error 以下なら ok
-            if expected_float == 0:
-                if output_float == 0:
-                    return True
-                else:
+            # 出力を2次元配列と見なして各要素を誤差ジャッジ
+            output_lines = output.splitlines()
+            expected_lines = expected.splitlines()
+            if len(output_lines) != len(expected_lines):
+                return False
+            for i in range(len(output_lines)):
+                outputs = output_lines[i].split()
+                expecteds = expected_lines[i].split()
+                if len(outputs) != len(expecteds):
                     return False
-            else:
-                if abs((output_float - expected_float) / expected_float) <= rel_error:
-                    return True
+                for j in range(len(outputs)):
+                    output_float = float(outputs[j])
+                    expected_float = float(expecteds[j])
+                    
+                    # 絶対誤差が abs_error 以下なら ok
+                    if abs(output_float - expected_float) <= abs_error:
+                        continue
 
-            return False
+                    # 相対誤差が rel_error 以下なら ok
+                    if expected_float == 0:
+                        if output_float == 0:
+                            continue
+                        else:
+                            return False
+                    else:
+                        if abs((output_float - expected_float) / expected_float) <= rel_error:
+                            continue
+                        else :
+                            return False
+
+            return True
         except ValueError:
             # 出力が不正.
             return False
