@@ -171,6 +171,8 @@ def passed(
             # 出力を2次元配列と見なして各要素を誤差ジャッジ
             output_lines = output.splitlines()
             expected_lines = expected.splitlines()
+            if len(output_lines) != len(expected_lines):
+                return False
             for i in range(len(output_lines)):
                 outputs = output_lines[i].split()
                 expecteds = expected_lines[i].split()
