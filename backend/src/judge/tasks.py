@@ -174,6 +174,8 @@ def passed(
             for i in range(len(output_lines)):
                 outputs = output_lines[i].split()
                 expecteds = expected_lines[i].split()
+                if len(outputs) != len(expecteds):
+                    return False
                 for j in range(len(outputs)):
                     output_float = float(outputs[j])
                     expected_float = float(expecteds[j])
