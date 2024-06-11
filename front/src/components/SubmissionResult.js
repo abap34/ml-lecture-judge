@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Container, Typography, Box, Paper, Table, TableBody, TableCell, TableContainer, TableRow, Chip, Tab } from '@mui/material';
+import { Container, Typography, Box, Paper, Table, TableBody, TableCell, TableContainer, TableRow, Chip } from '@mui/material';
 import { useCodeMirror } from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 
