@@ -63,5 +63,17 @@ services:
     depends_on:
       - backend
 
+  sqlite-web:
+    image: coleifer/sqlite-web
+    container_name: sqlite-web
+    ports:
+      - "8080:8080"
+    volumes:
+      - data:/data
+    environment:
+      - SQLITE_DATABASE=/data/database.db
+    depends_on:
+      - backend
+
 volumes:
   data:
