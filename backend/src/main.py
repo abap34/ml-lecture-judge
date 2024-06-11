@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
-from models import CodeSubmission, ProblemSummary, SubmissionResult
+from models import CodeSubmission, ProblemSummary, SubmissionResult, ProblemDetail
 from db import SessionLocal, init_db, add_submission, update_submission, get_submission
 from judge.tasks import evaluate_code
 import yaml
@@ -125,14 +125,14 @@ def get_problems():
     ]
     return problems
 
-@app.get("/problems/{problem_name}")
+@app.get("/problems/{problem_name}", response_model=ProblemDetail)
 def get_problem(problem_name: str):
     try:
         with open(f"static/problems/{problem_name}/problem.yaml") as f:
             problem = yaml.safe_load(f)
         with open(f"static/problems/{problem_name}/description.md") as f:
             description = f.read()
-        return {"problem": problem, "description": description}
+        return {"settings": problem, "description": description}
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Problem not found")
 
