@@ -8,6 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight';
+import rehypeRaw from 'rehype-raw';
 
 function ProblemDetail() {
   const { problemName } = useParams();
@@ -81,7 +82,7 @@ function ProblemDetail() {
       </Box>
 
       <Divider />
-      <ReactMarkdown rehypePlugins={[rehypeKatex, rehypeHighlight]} remarkPlugins={[remarkMath]}>
+      <ReactMarkdown rehypePlugins={[rehypeKatex, rehypeHighlight, rehypeRaw]} remarkPlugins={[remarkMath]}>
         {problemContent}
       </ReactMarkdown>
       <Box mt={4} width="100%">
