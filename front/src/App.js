@@ -1,14 +1,15 @@
-import CloseIcon from '@mui/icons-material/Close';
-import MenuIcon from '@mui/icons-material/Menu';
+import React, { useEffect, useState } from 'react';
 import { AppBar, Box, Button, CssBaseline, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Drawer, IconButton, Toolbar, Typography } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import axios from 'axios';
-import React, { useEffect, useState } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import axios from 'axios';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 import ProblemDetail from './components/ProblemDetail';
 import ProblemList from './components/ProblemList';
 import SubmissionResult from './components/SubmissionResult';
 import Welcome from './components/Welcome';
+import Leaderboard from './components/LeaderBoard'; // Import the Leaderboard component
 
 // カスタムテーマの作成
 const theme = createTheme({
@@ -70,7 +71,6 @@ const AppContent = () => {
           setIsLoggedIn(true);
           getUserInfo();
         } else {
-          console.log('User is not logged in');
           setOpenDialog(true);
         }
       } catch (error) {
@@ -85,7 +85,6 @@ const AppContent = () => {
     try {
       const response = await axios.get('http://localhost:8000/traq_name', { withCredentials: true });
       setUserName(response.data.name);
-      console.log('Logged in user:', response.data.name);
     } catch (error) {
       console.error('Error getting user info:', error);
     }
@@ -160,6 +159,7 @@ const AppContent = () => {
           <Routes>
             <Route path="/problems/:problemName" element={<ProblemDetail />} />
             <Route path="/result/:taskId" element={<SubmissionResult />} />
+            <Route path="/leaderboard" element={<Leaderboard />} /> {/* Add Leaderboard route */}
             <Route path="/" element={<Welcome />} />
           </Routes>
         </Box>
