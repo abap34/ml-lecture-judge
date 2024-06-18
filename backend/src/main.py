@@ -100,14 +100,18 @@ def read_root():
     return {"Hello": "?"}
 
 
-def get_user_name(token: str) -> str:
+def get_payload(token: str) -> dict:
     payload = token.split(".")[1]
     payload += "=" * ((4 - len(payload) % 4) % 4)
-    return json.loads(base64.urlsafe_b64decode(payload).decode("utf-8"))["name"]
+    return json.loads(base64.urlsafe_b64decode(payload).decode("utf-8"))
+
+def get_user_name(token: str) -> str:
+    return get_payload(token)["name"]
 
 
 @app.get("/login_status")
 async def login_status(request: Request):
+    print(request.session.keys())
     token = request.session.get("id_token")
     if token:
         return {"logged_in": True}
@@ -116,12 +120,12 @@ async def login_status(request: Request):
 
 @app.get("/userinfo", dependencies=[Depends(oauth2_scheme)])
 async def get_user_info(request: Request):
-    token = request.session.get("token")
+    token = request.session.get("id_token")
     if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     try:
-        userinfo = json.loads(base64.b64decode(token["id_token"].split(".")[1] + "=="))
+        userinfo = get_payload(token)
         return {"userinfo": userinfo}
     except (KeyError, IndexError, json.JSONDecodeError) as e:
         raise HTTPException(status_code=400, detail=f"Token decoding error: {str(e)}")
