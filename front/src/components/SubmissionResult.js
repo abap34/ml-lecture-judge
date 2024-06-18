@@ -9,11 +9,11 @@ const SubmissionResult = () => {
   const { taskId } = useParams();
   const [submissionResult, setSubmissionResult] = useState(null);
   const editor = useRef(null);
-
+  
   useEffect(() => {
     const fetchResult = async (taskId) => {
       try {
-        const resultResponse = await axios.get(`http://localhost:8000/result/${taskId}`);
+        const resultResponse = await axios.get(`http://localhost:8000/result/${taskId}`, { withCredentials: true });
         if (resultResponse.data.status === "Completed") {
           setSubmissionResult(resultResponse.data.result);
         } else if (resultResponse.data.status === "Pending") {

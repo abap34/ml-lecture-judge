@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Container, Button, Typography, Box, Divider } from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useCodeMirror } from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
+import { Box, Button, Container, Divider, Typography } from '@mui/material';
+import { useCodeMirror } from '@uiw/react-codemirror';
 import axios from 'axios';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
+import { useNavigate, useParams } from 'react-router-dom';
 import rehypeHighlight from 'rehype-highlight';
+import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
+import remarkMath from 'remark-math';
 
 function ProblemDetail() {
   const { problemName } = useParams();
@@ -21,7 +21,7 @@ function ProblemDetail() {
   useEffect(() => {
     const fetchProblemContent = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/problems/${problemName}`);
+        const response = await axios.get(`http://localhost:8000/problems/${problemName}`, { withCredentials: true });
         const data = response.data.settings;
         setProblemSummary(data.summary);
         setProblemConstraints(data.constraints);
@@ -40,7 +40,8 @@ function ProblemDetail() {
         code: code,
         userid: 'testuser',
         problem_name: problemName,
-      });
+      },
+        { withCredentials: true });
       const id = response.data.task_id;
       console.log(`Submitted! Task ID: ${id}`);
       navigate(`/result/${id}`);

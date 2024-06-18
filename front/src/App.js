@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
-import { Typography, Box, Drawer, AppBar, Toolbar, CssBaseline, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
-import ProblemList from './components/ProblemList';
-import ProblemDetail from './components/ProblemDetail';
-import Welcome from './components/Welcome';
-import SubmissionResult from './components/SubmissionResult';
+import MenuIcon from '@mui/icons-material/Menu';
+import { AppBar, Box, Button, CssBaseline, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Drawer, IconButton, Toolbar, Typography } from '@mui/material';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { Link, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import ProblemDetail from './components/ProblemDetail';
+import ProblemList from './components/ProblemList';
+import SubmissionResult from './components/SubmissionResult';
+import Welcome from './components/Welcome';
 
 // カスタムテーマの作成
 const theme = createTheme({
@@ -38,10 +38,10 @@ const theme = createTheme({
           borderRadius: '8px',
           textTransform: 'none',
           fontSize: '16px',
-          backgroundColor: '#FFFFFF', 
-          color: '#ff9854', 
+          backgroundColor: '#FFFFFF',
+          color: '#ff9854',
           '&:hover': {
-            backgroundColor: '#FFE0B2', 
+            backgroundColor: '#FFE0B2',
           },
         },
       },
@@ -56,10 +56,10 @@ const theme = createTheme({
   },
 });
 
-
 const AppContent = () => {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
@@ -84,12 +84,9 @@ const AppContent = () => {
 
   const getUserInfo = async () => {
     try {
-      // get bearer token. get from cookie
-      const token = document.cookie.split('=')[1];
-      console.log('token:', token);
-      
-      const response = await axios.get('http://localhost:8000/userinfo', { withCredentials: true });
-      console.log('Logged in user:', response.data.userinfo.name);
+      const response = await axios.get('http://localhost:8000/traq_name', { withCredentials: true });
+      setUserName(response.data.name);
+      console.log('Logged in user:', response.data.name);
     } catch (error) {
       console.error('Error getting user info:', error);
     }
@@ -125,7 +122,7 @@ const AppContent = () => {
             <Link to="/" style={{ textDecoration: 'none', color: 'white' }}>ml-lecture online judge</Link>
           </Typography>
           <Typography variant="h6" noWrap sx={{ flexGrow: 1 }} />
-           Logged in as: {isLoggedIn ? 'testuser' : 'Guest'}
+          {isLoggedIn ? `Logged in as: ${userName}` : 'Guest User'}
         </Toolbar>
       </AppBar>
       <Box sx={{ display: 'flex' }}>
@@ -171,10 +168,10 @@ const AppContent = () => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}  autoFocus>
+          <Button onClick={() => setOpenDialog(false)} autoFocus>
             キャンセル
           </Button>
-          <Button onClick={handleLogin}  autoFocus>
+          <Button onClick={handleLogin} autoFocus>
             ログイン
           </Button>
         </DialogActions>
