@@ -51,6 +51,9 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - PYTHONUNBUFFERED=1
+      - TRAQ_CLIENT_ID=${TRAQ_CLIENT_ID}
+      - TRAQ_CLIENT_SECRET=${TRAQ_CLIENT_SECRET}
+      - SECRET_KEY=${SECRET_KEY}
 
   front:
     build:
