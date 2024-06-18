@@ -9,3 +9,5 @@ flower
 uvicorn
 pyyaml
 authlib
+starlette
+itsdangerous
