@@ -45,6 +45,7 @@ class Submission(Base):
     execution_time = Column(Float, nullable=True)
     submitted_at = Column(TIMESTAMP, default=datetime.utcnow)
     pass_cases = Column(Integer, default=0)
+    get_points = Column(Integer, default=0)
 
 
 class CodeSubmission(BaseModel):

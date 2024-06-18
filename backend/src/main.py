@@ -36,10 +36,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=os.getenv("SECRET_KEY")
-)
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY"))
 
 
 oauth = OAuth()
@@ -80,8 +77,9 @@ def load_token(request: Request):
     id_token_2 = request.cookies.get("id_token_2")
     if not id_token_1 or not id_token_2:
         return None
-    
+
     return id_token_1 + id_token_2
+
 
 def n_testcases(problem_name: str) -> int:
     inputs = glob.glob(f"static/problems/{problem_name}/in/*.in")
@@ -101,6 +99,10 @@ def get_all_testcases(problem_name: str) -> List[Dict[str, str]]:
     ]
     return testcases
 
+def get_summary(problem_name: str) -> Dict[str, any]:
+    with open(f"static/problems/{problem_name}/problem.yaml") as f:
+        problem = yaml.safe_load(f)
+    return problem["summary"]
 
 def get_constraints(problem_name: str) -> Dict[str, any]:
     with open(f"static/problems/{problem_name}/problem.yaml") as f:
@@ -238,9 +240,6 @@ async def submit_code(
         request.problem_name,
         request.userid,
         request.code,
-        "WJ",
-        execution_time=None,
-        team_id=None,
     )
     return {"task_id": task.id, "status": "Submitted"}
 
@@ -261,13 +260,22 @@ def get_result(task_id: str, db: Session = Depends(get_db)):
     if task.ready():
         result = task.get()
 
+        pending_submit = get_submission(db, task_id)
+
+        if result["status"] == "AC":
+            get_points = get_summary(pending_submit.problem_name)["points"]
+        else:
+            get_points = 0
+
         update_submission(
             db,
             task_id,
             status=result["status"],
             execution_time=result["time"],
             pass_cases=result["pass_cases"],
+            get_points=get_points,
         )
+
         try:
             submit = get_submission(db, task_id)
         except NoResultFound:

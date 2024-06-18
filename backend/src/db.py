@@ -17,8 +17,8 @@ def init_db():
     Base.metadata.create_all(bind=engine)
 
 def add_submission(
-    db: Session, submission_id: str, problem_name: str, user_id: int, code: str, status: str,
-    execution_time: Optional[float] = None, team_id: Optional[int] = None, pass_cases: int = 0
+    db: Session, submission_id: str, problem_name: str, user_id: int, code: str, status: str = "WJ",
+    execution_time: Optional[float] = None, team_id: Optional[int] = None, pass_cases: int = 0, get_points: int = 0
 ) -> Submission:
     submission = Submission(
         id=submission_id,
@@ -28,7 +28,8 @@ def add_submission(
         status=status,
         execution_time=execution_time,
         team_id=team_id,
-        pass_cases=pass_cases
+        pass_cases=pass_cases,
+        get_points=get_points
     )
     db.add(submission)
     db.commit()
@@ -36,7 +37,7 @@ def add_submission(
 
 def update_submission(
     db: Session, submission_id: str, status: Optional[str] = None,
-    execution_time: Optional[float] = None, pass_cases: Optional[int] = None
+    execution_time: Optional[float] = None, pass_cases: Optional[int] = None, get_points: Optional[int] = None
 ):
     submission = db.query(Submission).filter(Submission.id == submission_id).first()
     if submission is None:
@@ -47,6 +48,8 @@ def update_submission(
         submission.execution_time = execution_time
     if pass_cases is not None:
         submission.pass_cases = pass_cases
+    if get_points is not None:
+        submission.get_points = get_points
     db.commit()
     db.refresh(submission)
 
