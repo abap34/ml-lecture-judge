@@ -161,7 +161,7 @@ $ python3 helper.py generate mean-squared-error
 これで `in/` 以下の入力例に対して、解答例を実行した結果が `out/` 以下に生成されます。
 
 
-## チェック
+<!-- ## チェック
 
 ```bash
 $ chmod +x build.sh
@@ -169,7 +169,7 @@ $ ./build.sh
 $ docker-compose up
 ```
 
-で `localhost:3000` にアクセスし、左上のメニューから問題を選んで提出して正常に動作するか確認してください。
+で `localhost:3000` にアクセスし、左上のメニューから問題を選んで提出して正常に動作するか確認してください。 -->
 
 ## Pull Request
 
