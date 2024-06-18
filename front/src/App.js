@@ -67,7 +67,6 @@ const AppContent = () => {
       try {
         const response = await axios.get('http://localhost:8000/login_status', { withCredentials: true });
         if (response.data.logged_in) {
-          console.log('User is logged in');
           setIsLoggedIn(true);
           getUserInfo();
         } else {
@@ -121,8 +120,18 @@ const AppContent = () => {
           <Typography variant="h6" noWrap>
             <Link to="/" style={{ textDecoration: 'none', color: 'white' }}>ml-lecture online judge</Link>
           </Typography>
-          <Typography variant="h6" noWrap sx={{ flexGrow: 1 }} />
-          {isLoggedIn ? `Logged in as: ${userName}` : 'Guest User'}
+          <Box sx={{ flexGrow: 1 }} />
+          {isLoggedIn ? (
+            <>
+              <Typography variant="h6" noWrap sx={{ mr: 2 }}>
+                Logged in as: {userName}
+              </Typography>
+            </>
+          ) : (
+            <Button color="inherit" onClick={handleLogin} sx={{ ml: 2 }}>
+              Login
+            </Button>
+          )}
         </Toolbar>
       </AppBar>
       <Box sx={{ display: 'flex' }}>
