@@ -11,3 +11,4 @@ pyyaml
 authlib
 starlette
 itsdangerous
+jwt
