@@ -36,9 +36,11 @@ function ProblemDetail() {
 
   const handleCodeSubmit = async () => {
     try {
+      // TODO: ちゃんとする
+      const userid = await axios.get('http://localhost:8000/traq_name', { withCredentials: true }).then(res => res.data.name);
       const response = await axios.post(`http://localhost:8000/submit/${problemName}`, {
         code: code,
-        userid: 'testuser',
+        userid: userid,
         problem_name: problemName,
       },
         { withCredentials: true });
