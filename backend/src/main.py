@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 from typing import Dict, List
 
+import jwt
 import uvicorn
 import yaml
 from authlib.integrations.base_client.errors import OAuthError
@@ -35,7 +36,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY"))
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SECRET_KEY")
+)
+
 
 oauth = OAuth()
 
@@ -70,6 +75,14 @@ def get_db():
         db.close()
 
 
+def load_token(request: Request):
+    id_token_1 = request.cookies.get("id_token_1")
+    id_token_2 = request.cookies.get("id_token_2")
+    if not id_token_1 or not id_token_2:
+        return None
+    
+    return id_token_1 + id_token_2
+
 def n_testcases(problem_name: str) -> int:
     inputs = glob.glob(f"static/problems/{problem_name}/in/*.in")
     return len(inputs)
@@ -100,10 +113,32 @@ def read_root():
     return {"Hello": "?"}
 
 
+async def verify_user(request: Request):
+    id_token = load_token(request)
+
+    if not id_token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    decoded_jwt = verify_token(id_token)
+
+    return decoded_jwt
+
+
+async def verify_token(id_token: str):
+    jwks = await oauth.auth0.fetch_jwk_set()
+    try:
+        decoded_jwt = jwt.decode(s=id_token, key=jwks)
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    return decoded_jwt
+
+
 def get_payload(token: str) -> dict:
     payload = token.split(".")[1]
     payload += "=" * ((4 - len(payload) % 4) % 4)
     return json.loads(base64.urlsafe_b64decode(payload).decode("utf-8"))
+
 
 def get_user_name(token: str) -> str:
     return get_payload(token)["name"]
@@ -111,34 +146,34 @@ def get_user_name(token: str) -> str:
 
 @app.get("/login_status")
 async def login_status(request: Request):
-    print(request.session.keys())
-    token = request.session.get("id_token")
-    if token:
+    # print(request.cookies["ml_judge_session"])
+    id_token = load_token(request)
+
+    if id_token:
         return {"logged_in": True}
-    return {"logged_in": False}
+    else:
+        return {"logged_in": False}
 
 
-@app.get("/userinfo", dependencies=[Depends(oauth2_scheme)])
+@app.get("/traq_name", dependencies=[Depends(verify_user)])
 async def get_user_info(request: Request):
-    token = request.session.get("id_token")
-    if not token:
+    id_token = load_token(request)
+    if not id_token:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     try:
-        userinfo = get_payload(token)
-        return {"userinfo": userinfo}
+        traq_name = get_payload(id_token)
+        return {"name": traq_name["name"]}
     except (KeyError, IndexError, json.JSONDecodeError) as e:
         raise HTTPException(status_code=400, detail=f"Token decoding error: {str(e)}")
 
 
 @app.get("/login")
 async def login(request: Request):
-    return await oauth.traq.authorize_redirect(
-        request, "http://localhost:8000/callback"
-    )
+    return await oauth.traq.authorize_redirect(request, "http://localhost:8000/auth")
 
 
-@app.route("/callback")
+@app.route("/auth")
 async def auth(request: Request):
     try:
         token = await oauth.traq.authorize_access_token(request)
@@ -147,14 +182,29 @@ async def auth(request: Request):
 
     request.session["id_token"] = token["id_token"]
 
-    return RedirectResponse(url="http://localhost:3000/")
+    response = RedirectResponse(url="http://localhost:3000/")
+
+    id_token_1 = token["id_token"][0:2000]
+    id_token_2 = token["id_token"][2000:]
+
+    response.set_cookie(
+        key="id_token_1",
+        value=id_token_1,
+    )
+
+    response.set_cookie(
+        key="id_token_2",
+        value=id_token_2,
+    )
+
+    return response
 
 
 @app.post("/submit/{problem_name}")
 async def submit_code(
     request: CodeSubmission,
     db: Session = Depends(get_db),
-    token: str = Depends(oauth2_scheme),
+    token: str = Depends(verify_user),
 ):
     constraints = get_constraints(request.problem_name)
     timelimit = constraints["time"]
@@ -195,7 +245,7 @@ async def submit_code(
     return {"task_id": task.id, "status": "Submitted"}
 
 
-@app.get("/reset_db/are_you_sure", dependencies=[Depends(oauth2_scheme)])
+@app.get("/reset_db/are_you_sure", dependencies=[Depends(verify_user)])
 def reset_db():
     init_db()
     return {"status": "OK"}
@@ -204,7 +254,7 @@ def reset_db():
 @app.get(
     "/result/{task_id}",
     response_model=SubmissionResult,
-    dependencies=[Depends(oauth2_scheme)],
+    dependencies=[Depends(verify_user)],
 )
 def get_result(task_id: str, db: Session = Depends(get_db)):
     task = evaluate_code.AsyncResult(task_id)
@@ -241,7 +291,7 @@ def get_result(task_id: str, db: Session = Depends(get_db)):
 @app.get(
     "/problems",
     response_model=List[ProblemSummary],
-    dependencies=[Depends(oauth2_scheme)],
+    dependencies=[Depends(verify_user)],
 )
 def get_problems():
     problems = glob.glob("static/problems/*")
@@ -265,7 +315,7 @@ def get_problems():
 @app.get(
     "/problems/{problem_name}",
     response_model=ProblemDetail,
-    dependencies=[Depends(oauth2_scheme)],
+    dependencies=[Depends(verify_user)],
 )
 def get_problem(problem_name: str):
     try:
