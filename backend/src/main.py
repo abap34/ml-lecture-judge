@@ -10,7 +10,16 @@ import uvicorn
 import yaml
 from authlib.integrations.base_client.errors import OAuthError
 from authlib.integrations.starlette_client import OAuth
-from db import SessionLocal, add_submission, get_submission, init_db, update_submission
+from db import (
+    SessionLocal,
+    add_submission,
+    calculate_team_scores,
+    calculate_user_scores,
+    get_submission,
+    add_user,
+    init_db,
+    update_submission,
+)
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
@@ -99,10 +108,12 @@ def get_all_testcases(problem_name: str) -> List[Dict[str, str]]:
     ]
     return testcases
 
+
 def get_summary(problem_name: str) -> Dict[str, any]:
     with open(f"static/problems/{problem_name}/problem.yaml") as f:
         problem = yaml.safe_load(f)
     return problem["summary"]
+
 
 def get_constraints(problem_name: str) -> Dict[str, any]:
     with open(f"static/problems/{problem_name}/problem.yaml") as f:
@@ -145,6 +156,9 @@ def get_payload(token: str) -> dict:
 def get_user_name(token: str) -> str:
     return get_payload(token)["name"]
 
+def get_icon_url(token: str) -> str:
+    return get_payload(token)["picture"]
+
 
 @app.get("/login_status")
 async def login_status(request: Request):
@@ -158,14 +172,24 @@ async def login_status(request: Request):
 
 
 @app.get("/traq_name", dependencies=[Depends(verify_user)])
-async def get_user_info(request: Request):
+async def traq_name(request: Request):
     id_token = load_token(request)
     if not id_token:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     try:
-        traq_name = get_payload(id_token)
-        return {"name": traq_name["name"]}
+        return {"name": get_user_name(id_token)}
+    except (KeyError, IndexError, json.JSONDecodeError) as e:
+        raise HTTPException(status_code=400, detail=f"Token decoding error: {str(e)}")
+
+@app.get("/icon_url", dependencies=[Depends(verify_user)])
+async def icon_url(request: Request):
+    id_token = load_token(request)
+    if not id_token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    try:
+        return {"icon_url": get_icon_url(id_token)}
     except (KeyError, IndexError, json.JSONDecodeError) as e:
         raise HTTPException(status_code=400, detail=f"Token decoding error: {str(e)}")
 
@@ -198,6 +222,11 @@ async def auth(request: Request):
         key="id_token_2",
         value=id_token_2,
     )
+
+   
+    db = SessionLocal()
+    add_user(db, get_user_name(token["id_token"]), get_icon_url(token["id_token"]))
+    db.close()
 
     return response
 
@@ -244,7 +273,7 @@ async def submit_code(
     return {"task_id": task.id, "status": "Submitted"}
 
 
-@app.get("/reset_db/are_you_sure", dependencies=[Depends(verify_user)])
+@app.get("/reset_db/are_you_sure")
 def reset_db():
     init_db()
     return {"status": "OK"}
@@ -334,6 +363,18 @@ def get_problem(problem_name: str):
         return {"settings": problem, "description": description}
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Problem not found")
+
+
+@app.get("/leaderboard/users", dependencies=[Depends(verify_user)])
+def get_user_leaderboard(db: Session = Depends(get_db)):
+    user_scores = calculate_user_scores(db)
+    return user_scores
+
+
+@app.get("/leaderboard/teams", dependencies=[Depends(verify_user)])
+def get_team_leaderboard(db: Session = Depends(get_db)):
+    team_scores = calculate_team_scores(db)
+    return team_scores
 
 
 if __name__ == "__main__":
