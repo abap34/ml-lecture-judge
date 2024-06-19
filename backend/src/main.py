@@ -24,7 +24,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2AuthorizationCodeBearer
-from judge.tasks import evaluate_code
+from tasks import evaluate_code
 from models import CodeSubmission, ProblemDetail, ProblemSummary, SubmissionResult
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session

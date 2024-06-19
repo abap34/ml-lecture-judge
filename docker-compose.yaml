@@ -12,7 +12,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile.celery
     container_name: celery-worker
-    command: celery -A judge.tasks worker --loglevel=info
+    command: celery -A tasks worker --loglevel=info
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - data:/app/data
@@ -28,7 +28,7 @@ services:
       dockerfile: Dockerfile.celery
     image: mher/flower
     container_name: flower
-    command: celery -A judge.tasks --broker=redis://redis:6379/0 flower --port=5555 
+    command: celery -A tasks --broker=redis://redis:6379/0 flower --port=5555 
     ports:
       - "5555:5555"
     depends_on:

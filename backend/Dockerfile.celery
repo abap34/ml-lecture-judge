@@ -6,5 +6,5 @@ WORKDIR /app
 COPY requirements.txt /app/
 RUN pip install -r requirements.txt
 
-COPY src/judge/ /app/judge/
+COPY src/tasks.py /app/
 
