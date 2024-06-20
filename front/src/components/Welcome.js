@@ -1,10 +1,9 @@
-import React from 'react';
-import { Container, Typography, Box } from '@mui/material';
-import { Spring, animated } from 'react-spring';
-import HomeIcon from '@mui/icons-material/Home';
+import AnnouncementIcon from '@mui/icons-material/Announcement';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import ImportantDevicesIcon from '@mui/icons-material/ImportantDevices';
-import AnnouncementIcon from '@mui/icons-material/Announcement';
+import { Box, Container, Typography } from '@mui/material';
+import React from 'react';
+import { Spring, animated } from 'react-spring';
 
 function Welcome() {
   return (
@@ -76,13 +75,15 @@ function Welcome() {
             </Typography>
 
             <Typography variant="body1" component="pre" gutterBottom>
-              Python 3.11
-              <br />
-              numpy==1.26.4
-              <br />
-              torch==2.3.0
-              <br />
+              {`
+              Python 3.11.9
+              networkx==3.2.1
+              numpy==1.26.3
               scikit-learn==1.5.0
+              scipy==1.13.1
+              sympy==1.12
+              torch==2.3.1
+              `}
             </Typography>
           </animated.div>
         )}
