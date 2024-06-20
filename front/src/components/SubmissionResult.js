@@ -4,12 +4,15 @@ import axios from 'axios';
 import { Container, Typography, Box, Paper, Table, TableBody, TableCell, TableContainer, TableRow, Chip } from '@mui/material';
 import { useCodeMirror } from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
+import Confetti from 'react-confetti';
+import useWindowSize from 'react-use/lib/useWindowSize'
 
 const SubmissionResult = () => {
   const { taskId } = useParams();
   const [submissionResult, setSubmissionResult] = useState(null);
   const editor = useRef(null);
-  
+  const { width, height } = useWindowSize();
+
   useEffect(() => {
     const fetchResult = async (taskId) => {
       try {
@@ -63,6 +66,7 @@ const SubmissionResult = () => {
       </Typography>
       {submissionResult ? (
         <>
+          {submissionResult.status === "AC" && <Confetti width={width} height={height} />}
           <Box p={2} mb={4} component={Paper}>
             <Typography variant="h6" gutterBottom>Submitted Code</Typography>
             <div ref={editor} style={{ border: '1px solid #ddd', borderRadius: '4px', height: '400px', overflow: 'auto' }}></div>
@@ -103,7 +107,10 @@ const SubmissionResult = () => {
           </Box>
         </>
       ) : (
-        <Typography variant="body1">Loading result...</Typography>
+        <Typography variant="body1">
+          ジャッジ中...
+          (この画面で待機してください)
+        </Typography>
       )}
     </Container>
   );
