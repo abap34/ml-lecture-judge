@@ -225,7 +225,7 @@ async def auth(request: Request):
 
    
     db = SessionLocal()
-    add_user(db, get_user_name(token["id_token"]), get_icon_url(token["id_token"]))
+    add_user(db, get_user_name(token["id_token"]), get_icon_url(token["id_token"]), duplicate_ok=True)
     db.close()
 
     return response

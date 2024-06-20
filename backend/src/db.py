@@ -78,11 +78,19 @@ def get_submission(db: Session, submission_id: str) -> Submission:
     return submission
 
 
-def add_user(db: Session, id: str, icon_url: Optional[str] = None):
+def add_user(db: Session, id: str, icon_url: Optional[str] = None, duplicate_ok: bool = False) -> None:
     user = User(id=id, icon_url=icon_url)
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    if not duplicate_ok:
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    else:
+        # いたら何もしない
+        if db.query(User).filter(User.id == id).first() is None:
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+
 
 
 def calculate_user_scores(db: Session) -> list[UserLeaderBoardRow]:
