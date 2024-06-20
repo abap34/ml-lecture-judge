@@ -10,10 +10,6 @@ x = list(map(float, input().split()))
 y = np.array(y)
 x = np.array(x)
 
-import matplotlib.pyplot as plt
-plt.plot(x, y, 'o')
-plt.savefig("test.png") 
-
 # compute lse
 yb = np.mean(y)
 xb = np.mean(x)
