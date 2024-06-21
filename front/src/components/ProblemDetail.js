@@ -21,7 +21,7 @@ function ProblemDetail() {
   useEffect(() => {
     const fetchProblemContent = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/problems/${problemName}`, { withCredentials: true });
+        const response = await axios.get(`${process.env.API_URL}/problems/${problemName}`, { withCredentials: true });
         const data = response.data.settings;
         setProblemSummary(data.summary);
         setProblemConstraints(data.constraints);
@@ -37,8 +37,8 @@ function ProblemDetail() {
   const handleCodeSubmit = async () => {
     try {
       // TODO: ちゃんとする
-      const userid = await axios.get('http://localhost:8000/traq_name', { withCredentials: true }).then(res => res.data.name);
-      const response = await axios.post(`http://localhost:8000/submit/${problemName}`, {
+      const userid = await axios.get(`${process.env.API_URL}/traq_name`, { withCredentials: true }).then(res => res.data.name);
+      const response = await axios.post(`${process.env.API_URL}/submit/${problemName}`, {
         code: code,
         userid: userid,
         problem_name: problemName,

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { Avatar, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import axios from 'axios';
-import { Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Avatar } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 
 const Leaderboard = () => {
   const [userScores, setUserScores] = useState([]);
@@ -9,7 +9,7 @@ const Leaderboard = () => {
   useEffect(() => {
     const fetchUserScores = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/leaderboard/users', { withCredentials: true });
+        const response = await axios.get(`${process.env.API_URL}/leaderboard/users`, { withCredentials: true });
         setUserScores(response.data);
       } catch (error) {
         console.error('Error fetching user scores:', error);
@@ -18,7 +18,7 @@ const Leaderboard = () => {
 
     const fetchTeamScores = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/leaderboard/teams', { withCredentials: true });
+        const response = await axios.get(`${process.env.API_URL}/leaderboard/teams`, { withCredentials: true });
         setTeamScores(response.data);
       } catch (error) {
         console.error('Error fetching team scores:', error);

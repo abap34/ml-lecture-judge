@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import { Container, Typography, Box, Paper, Table, TableBody, TableCell, TableContainer, TableRow, Chip } from '@mui/material';
-import { useCodeMirror } from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
+import { Box, Chip, Container, Paper, Table, TableBody, TableCell, TableContainer, TableRow, Typography } from '@mui/material';
+import { useCodeMirror } from '@uiw/react-codemirror';
+import axios from 'axios';
+import React, { useEffect, useRef, useState } from 'react';
 import Confetti from 'react-confetti';
-import useWindowSize from 'react-use/lib/useWindowSize'
+import { useParams } from 'react-router-dom';
+import useWindowSize from 'react-use/lib/useWindowSize';
 
 const SubmissionResult = () => {
   const { taskId } = useParams();
@@ -16,7 +16,7 @@ const SubmissionResult = () => {
   useEffect(() => {
     const fetchResult = async (taskId) => {
       try {
-        const resultResponse = await axios.get(`http://localhost:8000/result/${taskId}`, { withCredentials: true });
+        const resultResponse = await axios.get(`${process.env.API_URL}/result/${taskId}`, { withCredentials: true });
         if (resultResponse.data.status === "Completed") {
           setSubmissionResult(resultResponse.data.result);
         } else if (resultResponse.data.status === "Pending") {
@@ -79,7 +79,7 @@ const SubmissionResult = () => {
                   <TableRow>
                     <TableCell><strong>Problem</strong></TableCell>
                     <TableCell><a href={`/problems/${submissionResult.problem_name}`}>{submissionResult.problem_name}</a></TableCell>
-                    </TableRow>
+                  </TableRow>
                   <TableRow>
                     <TableCell><strong>Status</strong></TableCell>
                     <TableCell>

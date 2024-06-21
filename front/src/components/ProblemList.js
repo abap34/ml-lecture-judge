@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { List, ListItem, ListItemText, ListItemButton } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 function ProblemList({ onClose }) {
   const [problems, setProblems] = useState([]);
@@ -9,7 +9,7 @@ function ProblemList({ onClose }) {
   useEffect(() => {
     const fetchProblems = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/problems', { withCredentials: true });
+        const response = await axios.get(`${process.env.API_URL}/problems`, { withCredentials: true });
         setProblems(response.data);
       } catch (error) {
         console.error('There was an error fetching the problems!', error);

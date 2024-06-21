@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
+import MenuIcon from '@mui/icons-material/Menu';
 import { AppBar, Box, Button, CssBaseline, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Drawer, IconButton, Toolbar, Typography } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { Link, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import MenuIcon from '@mui/icons-material/Menu';
-import CloseIcon from '@mui/icons-material/Close';
+import React, { useEffect, useState } from 'react';
+import { Link, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
+import AuthRedirect from './components/Auth';
+import Leaderboard from './components/LeaderBoard';
 import ProblemDetail from './components/ProblemDetail';
 import ProblemList from './components/ProblemList';
 import SubmissionResult from './components/SubmissionResult';
 import Welcome from './components/Welcome';
-import Leaderboard from './components/LeaderBoard';
-import AuthRedirect from './components/Auth';
 
 // カスタムテーマの作成
 const theme = createTheme({
@@ -71,7 +71,7 @@ const AppContent = () => {
         // auth でログイン求めると無限ループする
         if (location.pathname === '/auth') return;
 
-        const response = await axios.get('http://localhost:8000/login_status', { withCredentials: true });
+        const response = await axios.get(`${process.env.API_URL}/login_status`, { withCredentials: true });
         if (response.data.logged_in) {
           setIsLoggedIn(true);
           getUserInfo();
@@ -88,7 +88,7 @@ const AppContent = () => {
 
   const getUserInfo = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/traq_name', { withCredentials: true });
+      const response = await axios.get(`${process.env.API_URL}/traq_name`, { withCredentials: true });
       setUserName(response.data.name);
     } catch (error) {
       console.error('Error getting user info:', error);
@@ -97,7 +97,7 @@ const AppContent = () => {
 
   const handleLogin = async () => {
     try {
-      window.location.href = 'http://localhost:8000/login';
+      window.location.href = `${process.env.API_URL}/login`;
     } catch (error) {
       console.error('Error during login:', error);
     }
@@ -164,7 +164,7 @@ const AppContent = () => {
           <Routes>
             <Route path="/problems/:problemName" element={<ProblemDetail />} />
             <Route path="/result/:taskId" element={<SubmissionResult />} />
-            <Route path="/leaderboard" element={<Leaderboard />} /> 
+            <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/auth" element={<AuthRedirect />} />
             <Route path="/" element={<Welcome />} />
           </Routes>
