@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AppBar, Box, Button, CssBaseline, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Drawer, IconButton, Toolbar, Typography } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { Link, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { Link, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
@@ -9,7 +9,8 @@ import ProblemDetail from './components/ProblemDetail';
 import ProblemList from './components/ProblemList';
 import SubmissionResult from './components/SubmissionResult';
 import Welcome from './components/Welcome';
-import Leaderboard from './components/LeaderBoard'; // Import the Leaderboard component
+import Leaderboard from './components/LeaderBoard';
+import AuthRedirect from './components/Auth';
 
 // カスタムテーマの作成
 const theme = createTheme({
@@ -62,10 +63,14 @@ const AppContent = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
+        // auth でログイン求めると無限ループする
+        if (location.pathname === '/auth') return;
+
         const response = await axios.get('http://localhost:8000/login_status', { withCredentials: true });
         if (response.data.logged_in) {
           setIsLoggedIn(true);
@@ -79,7 +84,7 @@ const AppContent = () => {
     };
 
     checkLoginStatus();
-  }, []);
+  }, [location.pathname]);
 
   const getUserInfo = async () => {
     try {
@@ -159,7 +164,8 @@ const AppContent = () => {
           <Routes>
             <Route path="/problems/:problemName" element={<ProblemDetail />} />
             <Route path="/result/:taskId" element={<SubmissionResult />} />
-            <Route path="/leaderboard" element={<Leaderboard />} /> {/* Add Leaderboard route */}
+            <Route path="/leaderboard" element={<Leaderboard />} /> 
+            <Route path="/auth" element={<AuthRedirect />} />
             <Route path="/" element={<Welcome />} />
           </Routes>
         </Box>
