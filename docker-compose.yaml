@@ -54,6 +54,8 @@ services:
       - TRAQ_CLIENT_ID=${TRAQ_CLIENT_ID}
       - TRAQ_CLIENT_SECRET=${TRAQ_CLIENT_SECRET}
       - SECRET_KEY=${SECRET_KEY}
+      - API_URL=${API_URL}
+      - FRONT_URL=${FRONT_URL}
 
   front:
     build:
