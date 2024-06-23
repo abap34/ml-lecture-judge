@@ -12,5 +12,4 @@ y = f(x)
 
 y.backward()
 
-# x.grad を小数点以下 3 桁まで出力
-print(round(x.grad.item(), 3))
+print(x.grad.item())
