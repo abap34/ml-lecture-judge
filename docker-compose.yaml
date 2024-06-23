@@ -68,7 +68,7 @@ services:
     depends_on:
       - backend
     environment:
-      - API_URL=${API_URL}
+      - REACT_APP_API_URL=${API_URL}
 
   sqlite-web:
     image: coleifer/sqlite-web
@@ -78,7 +78,7 @@ services:
     volumes:
       - data:/data
     environment:
-      - SQLITE_DATABASE=/data/database.db
+      - SQLITE_DATABASE=/app/data/db.sqlite3
     depends_on:
       - backend
 
