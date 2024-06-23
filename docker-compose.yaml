@@ -54,7 +54,6 @@ services:
       - TRAQ_CLIENT_ID=${TRAQ_CLIENT_ID}
       - TRAQ_CLIENT_SECRET=${TRAQ_CLIENT_SECRET}
       - SECRET_KEY=${SECRET_KEY}
-      - API_URL=${API_URL}
 
   front:
     build:
@@ -66,6 +65,8 @@ services:
       - ./front:/app  
     depends_on:
       - backend
+    environment:
+      - API_URL=${API_URL}
 
   sqlite-web:
     image: coleifer/sqlite-web
