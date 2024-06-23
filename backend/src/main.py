@@ -35,6 +35,7 @@ client_secret = os.getenv("TRAQ_CLIENT_SECRET")
 secret_key = os.getenv("SECRET_KEY")
 api_url = os.getenv("API_URL")
 front_url = os.getenv("FRONT_URL")
+current_section = int(os.getenv("CURRENT_SECTION"))
 
 app = FastAPI()
 
@@ -69,8 +70,8 @@ oauth.register(
     server_metadata_url="https://q.trap.jp/api/v3/oauth2/oidc/discovery",
 )
 
-if not all([client_id, client_secret, secret_key, api_url, front_url]):
-    for key in ["TRAQ_CLIENT_ID", "TRAQ_CLIENT_SECRET", "SECRET_KEY"]:
+if not all([client_id, client_secret, secret_key, api_url, front_url, current_section]):
+    for key in ["TRAQ_CLIENT_ID", "TRAQ_CLIENT_SECRET", "SECRET_KEY", "API_URL", "FRONT_URL", "CURRENT_SECTION"]:
         if not os.getenv(key):
             raise ValueError(f"{key} is not set")
 
@@ -333,23 +334,25 @@ def get_result(task_id: str, db: Session = Depends(get_db)):
     dependencies=[Depends(verify_user)],
 )
 def get_problems():
-    problems = glob.glob("static/problems/*")
-    problems = [
-        problem.split("/")[-1]
-        for problem in problems
-        if problem != "static/problems/helper.py"
-    ]
-    problems = [
-        {
-            "name": problem,
-            "title": yaml.safe_load(open(f"static/problems/{problem}/problem.yaml"))[
-                "summary"
-            ]["title"],
-        }
-        for problem in problems
-    ]
-    return problems
+    response = []
+    for problem in glob.glob("static/problems/*"):
+        if problem == "static/problems/helper.py":
+            continue
 
+        problem_name = problem.split("/")[-1]
+
+        summary = get_summary(problem_name)
+
+        if summary["section"] <= current_section:
+            response.append(
+                {
+                    "name": problem_name,
+                    "title": summary["title"],
+                    "section": summary["section"],
+                }
+            )
+
+    return response
 
 @app.get(
     "/problems/{problem_name}",
