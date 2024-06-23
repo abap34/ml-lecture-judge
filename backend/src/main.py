@@ -30,11 +30,18 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 
+client_id = os.getenv("TRAQ_CLIENT_ID")
+client_secret = os.getenv("TRAQ_CLIENT_SECRET")
+secret_key = os.getenv("SECRET_KEY")
+api_url = os.getenv("API_URL")
+front_url = os.getenv("FRONT_URL")
+
 app = FastAPI()
 
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    front_url,
 ]
 
 app.add_middleware(
@@ -45,7 +52,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY"))
+app.add_middleware(SessionMiddleware, secret_key=secret_key)
 
 
 oauth = OAuth()
@@ -57,19 +64,12 @@ oauth2_scheme = OAuth2AuthorizationCodeBearer(
 
 oauth.register(
     name="traq",
-    client_id=os.getenv("TRAQ_CLIENT_ID"),
-    client_secret=os.getenv("TRAQ_CLIENT_SECRET"),
+    client_id=client_id,
+    client_secret=client_secret,
     server_metadata_url="https://q.trap.jp/api/v3/oauth2/oidc/discovery",
 )
 
-
-client_id = os.getenv("TRAQ_CLIENT_ID")
-client_secret = os.getenv("TRAQ_CLIENT_SECRET")
-secret_key = os.getenv("SECRET_KEY")
-api_url = os.getenv("API_URL")
-front_url = os.getenv("FRONT_URL")
-
-if not all([client_id, client_secret, secret_key]):
+if not all([client_id, client_secret, secret_key, api_url, front_url]):
     for key in ["TRAQ_CLIENT_ID", "TRAQ_CLIENT_SECRET", "SECRET_KEY"]:
         if not os.getenv(key):
             raise ValueError(f"{key} is not set")
