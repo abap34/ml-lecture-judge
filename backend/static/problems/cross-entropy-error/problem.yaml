@@ -2,6 +2,7 @@
 summary: 
   title: Cross Entropy Error
   points: 100
+  section: 0
   
 # 制約
 constraints:

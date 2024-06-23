@@ -2,6 +2,7 @@
 summary: 
   title: Softmax
   points: 100
+  section: 6
   
 # 制約
 constraints:
