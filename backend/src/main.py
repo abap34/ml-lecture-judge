@@ -66,6 +66,8 @@ oauth.register(
 client_id = os.getenv("TRAQ_CLIENT_ID")
 client_secret = os.getenv("TRAQ_CLIENT_SECRET")
 secret_key = os.getenv("SECRET_KEY")
+api_url = os.getenv("API_URL")
+front_url = os.getenv("FRONT_URL")
 
 if not all([client_id, client_secret, secret_key]):
     for key in ["TRAQ_CLIENT_ID", "TRAQ_CLIENT_SECRET", "SECRET_KEY"]:
@@ -196,7 +198,7 @@ async def icon_url(request: Request):
 
 @app.get("/login")
 async def login(request: Request):
-    return await oauth.traq.authorize_redirect(request, "http://localhost:8000/auth")
+    return await oauth.traq.authorize_redirect(request, api_url + "/auth")
 
 
 @app.route("/auth")
@@ -208,7 +210,7 @@ async def auth(request: Request):
 
     request.session["id_token"] = token["id_token"]
 
-    response = RedirectResponse(url="http://localhost:3000/")
+    response = RedirectResponse(url=front_url)
 
     id_token_1 = token["id_token"][0:2000]
     id_token_2 = token["id_token"][2000:]
