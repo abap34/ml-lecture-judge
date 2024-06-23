@@ -5,7 +5,6 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
-import AuthRedirect from './components/Auth';
 import Leaderboard from './components/LeaderBoard';
 import ProblemDetail from './components/ProblemDetail';
 import ProblemList from './components/ProblemList';
@@ -165,7 +164,6 @@ const AppContent = () => {
             <Route path="/problems/:problemName" element={<ProblemDetail />} />
             <Route path="/result/:taskId" element={<SubmissionResult />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/auth" element={<AuthRedirect />} />
             <Route path="/" element={<Welcome />} />
           </Routes>
         </Box>
