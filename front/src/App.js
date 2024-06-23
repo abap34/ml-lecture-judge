@@ -67,9 +67,6 @@ const AppContent = () => {
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        // auth でログイン求めると無限ループする
-        if (location.pathname === '/auth') return;
-
         const response = await axios.get(`${process.env.API_URL}/login_status`, { withCredentials: true });
         if (response.data.logged_in) {
           setIsLoggedIn(true);
