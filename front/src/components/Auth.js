@@ -16,7 +16,7 @@ const AuthRedirect = () => {
 
                 console.log('Forwarding request with params:', params);
 
-                await axios.get(`${process.env.API_URL}/auth`, { params });
+                await axios.get(`${process.env.REACT_APP_API_URL}/auth`, { params });
             } catch (error) {
                 console.error('Error forwarding request:', error);
             }

@@ -16,7 +16,7 @@ const SubmissionResult = () => {
   useEffect(() => {
     const fetchResult = async (taskId) => {
       try {
-        const resultResponse = await axios.get(`${process.env.API_URL}/result/${taskId}`, { withCredentials: true });
+        const resultResponse = await axios.get(`${process.env.REACT_APP_API_URL}/result/${taskId}`, { withCredentials: true });
         if (resultResponse.data.status === "Completed") {
           setSubmissionResult(resultResponse.data.result);
         } else if (resultResponse.data.status === "Pending") {

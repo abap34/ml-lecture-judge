@@ -9,7 +9,7 @@ function ProblemList({ onClose }) {
   useEffect(() => {
     const fetchProblems = async () => {
       try {
-        const response = await axios.get(`${process.env.API_URL}/problems`, { withCredentials: true });
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/problems`, { withCredentials: true });
         setProblems(response.data);
       } catch (error) {
         console.error('There was an error fetching the problems!', error);

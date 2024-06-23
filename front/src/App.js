@@ -67,7 +67,7 @@ const AppContent = () => {
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        const response = await axios.get(`${process.env.API_URL}/login_status`, { withCredentials: true });
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/login_status`, { withCredentials: true });
         if (response.data.logged_in) {
           setIsLoggedIn(true);
           getUserInfo();
@@ -84,7 +84,7 @@ const AppContent = () => {
 
   const getUserInfo = async () => {
     try {
-      const response = await axios.get(`${process.env.API_URL}/traq_name`, { withCredentials: true });
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/traq_name`, { withCredentials: true });
       setUserName(response.data.name);
     } catch (error) {
       console.error('Error getting user info:', error);
@@ -93,7 +93,7 @@ const AppContent = () => {
 
   const handleLogin = async () => {
     try {
-      window.location.href = `${process.env.API_URL}/login`;
+      window.location.href = `${process.env.REACT_APP_API_URL}/login`;
     } catch (error) {
       console.error('Error during login:', error);
     }

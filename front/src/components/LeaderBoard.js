@@ -9,7 +9,7 @@ const Leaderboard = () => {
   useEffect(() => {
     const fetchUserScores = async () => {
       try {
-        const response = await axios.get(`${process.env.API_URL}/leaderboard/users`, { withCredentials: true });
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/leaderboard/users`, { withCredentials: true });
         setUserScores(response.data);
       } catch (error) {
         console.error('Error fetching user scores:', error);
@@ -18,7 +18,7 @@ const Leaderboard = () => {
 
     const fetchTeamScores = async () => {
       try {
-        const response = await axios.get(`${process.env.API_URL}/leaderboard/teams`, { withCredentials: true });
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/leaderboard/teams`, { withCredentials: true });
         setTeamScores(response.data);
       } catch (error) {
         console.error('Error fetching team scores:', error);
