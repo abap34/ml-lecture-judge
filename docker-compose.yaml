@@ -78,9 +78,9 @@ services:
     volumes:
       - data:/data
     environment:
-      - SQLITE_DATABASE=/app/data/db.sqlite3
+      - SQLITE_DATABASE=/data/db.sqlite3
     depends_on:
       - backend
 
 volumes:
-  data:
+  data: 

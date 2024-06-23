@@ -6,7 +6,8 @@ from sqlalchemy import asc, create_engine, desc, func
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session, sessionmaker
 
-DATABASE_URL = "sqlite:///./data/database.db"
+DATABASE_PATH = "/app/data/db.sqlite3"
+DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
