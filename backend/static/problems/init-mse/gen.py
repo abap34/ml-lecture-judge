@@ -7,8 +7,14 @@ import numpy as np
 
 def gen():
     n = np.random.randint(1, 101)
-    y = np.random.randint(-1000, 1001, n)
+    y = np.random.randint(-1000, 999, n)
 
+    # y の総和が n の倍数になるように調整
+    need = n - (y.sum() % n)
+
+    for i in range(need):
+        y[i] += 1
+        
     return y
 
 
