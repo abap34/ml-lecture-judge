@@ -1,3 +1,26 @@
+※ この問題はサンプル問題です。
+
+<details>
+<summary>解答</summary>
+
+```
+import torch
+
+f = eval(input())
+
+x = torch.tensor(float(input()), requires_grad=True)
+
+y = f(x)
+
+y.backward()
+
+print(x.grad.item())
+```
+
+</details>
+
+
+
 関数 $f: \mathbb{R} \to \mathbb{R}$ と 実数 $x$ が与えられます。
 
 $f'(x)$ を求めて出力してください。
