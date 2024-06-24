@@ -51,7 +51,17 @@ function Welcome() {
               </Typography>
             </Box>
             <Typography variant="body1" gutterBottom>
-              サイドバーから問題を選択してください。
+              サイドバーから問題一覧ページ、順位表ページにアクセスできます。
+              
+              <br />
+
+              問題ページでは問題文の閲覧、提出ができます。
+
+              <br />
+
+              使えるプログラミング言語は Python です。
+
+              <br />
             </Typography>
           </animated.div>
         )}
@@ -76,13 +86,13 @@ function Welcome() {
 
             <Typography variant="body1" component="pre" gutterBottom>
               {`
-              Python 3.11.9
-              networkx==3.2.1
-              numpy==1.26.3
-              scikit-learn==1.5.0
-              scipy==1.13.1
-              sympy==1.12
-              torch==2.3.1
+Python 3.11.9
+networkx==3.2.1
+numpy==1.26.3
+scikit-learn==1.5.0
+scipy==1.13.1
+sympy==1.12
+torch==2.3.1
               `}
             </Typography>
           </animated.div>
