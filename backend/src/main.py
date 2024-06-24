@@ -354,7 +354,7 @@ def get_problems():
             )
 
         # まず section でソート、次に points でソート
-        response = sorted(response, key=lambda x: (x["section"], x["points"]))
+        response = sorted(response, key=lambda x: (x["section"], x["point"]))
 
     return response
 
