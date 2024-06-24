@@ -1,0 +1,18 @@
+# 概要
+summary: 
+  title: Initialize for MSE
+  points: 300
+  section: 1
+  
+# 制約
+constraints:
+  # 実行時間制限 (ミリ秒)
+  time: 2000
+  # メモリ制限 (MB)
+  memory: 256
+  # 誤差ジャッジをするか？
+  error_judge: true
+  # 許容絶対誤差
+  absolute_error: 1e-3
+  # 許容相対誤差
+  relative_error: 1e-3
