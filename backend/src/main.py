@@ -37,6 +37,8 @@ api_url = os.getenv("API_URL")
 front_url = os.getenv("FRONT_URL")
 current_section = int(os.getenv("CURRENT_SECTION"))
 
+MAX_SPLIT_TOKEN = 10
+
 app = FastAPI()
 
 origins = [
@@ -84,13 +86,17 @@ def get_db():
         db.close()
 
 
-def load_token(request: Request):
-    id_token_1 = request.cookies.get("id_token_1")
-    id_token_2 = request.cookies.get("id_token_2")
-    if not id_token_1 or not id_token_2:
+def load_token(request: Request) -> str:
+    tokens = []
+    for i in range(MAX_SPLIT_TOKEN):
+        id_token = request.cookies.get(f"id_token_{i}")
+        if id_token:
+            tokens.append(id_token)
+        else:
+            break
+    if not tokens:
         return None
-
-    return id_token_1 + id_token_2
+    return "".join(tokens)
 
 
 def n_testcases(problem_name: str) -> int:
@@ -165,7 +171,6 @@ def get_icon_url(token: str) -> str:
 
 @app.get("/login_status")
 async def login_status(request: Request):
-    # print(request.cookies["ml_judge_session"])
     id_token = load_token(request)
 
     if id_token:
@@ -202,6 +207,17 @@ async def login(request: Request):
     return await oauth.traq.authorize_redirect(request, api_url + "/auth")
 
 
+# トークンを受け取り、2000 文字ずつに分割
+def split_token(token: str) -> List[str]:
+    tokens = [token[i:i + 2000] for i in range(0, len(token), 2000)]
+    if len(tokens) > MAX_SPLIT_TOKEN:
+        raise ValueError(f"Token is too long: {len(token)}")
+    
+    assert len("".join(tokens)) == len(token)
+    return tokens
+
+
+
 @app.route("/auth")
 async def auth(request: Request):
     try:
@@ -212,23 +228,21 @@ async def auth(request: Request):
     request.session["id_token"] = token["id_token"]
 
     response = RedirectResponse(url=front_url)
+    id_token = token["id_token"]
 
-    id_token_1 = token["id_token"][0:2000]
-    id_token_2 = token["id_token"][2000:]
+    try:
+        tokens = split_token(id_token)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail="Token is too long!")
 
-    response.set_cookie(
-        key="id_token_1",
-        value=id_token_1,
-    )
+    for i, token in enumerate(tokens):
+        response.set_cookie(
+            key=f"id_token_{i}",
+            value=token,
+        )
 
-    response.set_cookie(
-        key="id_token_2",
-        value=id_token_2,
-    )
-
-   
     db = SessionLocal()
-    add_user(db, get_user_name(token["id_token"]), get_icon_url(token["id_token"]), duplicate_ok=True)
+    add_user(db, get_user_name(id_token), get_icon_url(id_token), duplicate_ok=True)
     db.close()
 
     return response
