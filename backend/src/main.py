@@ -349,7 +349,7 @@ def get_problems():
                     "name": problem_name,
                     "title": summary["title"],
                     "section": summary["section"],
-                    "points": summary["points"],
+                    "point": summary["points"],
                 }
             )
 
