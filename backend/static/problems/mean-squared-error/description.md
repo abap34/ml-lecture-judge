@@ -30,8 +30,8 @@ y_1 y_2 ... y_n
 
 ```python3
 a, b = map(int, input().split())
-x = np.arrray(list(map(int, input().split())))
-y = np.arrray(list(map(int, input().split())))
+x = np.array(list(map(int, input().split())))
+y = np.array(list(map(int, input().split())))
 ```
 
 
