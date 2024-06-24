@@ -2,6 +2,7 @@
 summary: 
   title: Mean Squared Error
   points: 100
+  section: 1
   
 # 制約
 constraints:
