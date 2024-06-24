@@ -1,18 +1,18 @@
 import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
-import { AppBar, Box, Button, CssBaseline, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Drawer, IconButton, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, Button, CssBaseline, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Drawer, IconButton, Toolbar, Typography, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import Leaderboard from './components/LeaderBoard';
 import ProblemDetail from './components/ProblemDetail';
-import ProblemList from './components/ProblemList';
+import ProblemListPage from './components/ProblemListPage'; // 追加
 import SubmissionResult from './components/SubmissionResult';
 import Welcome from './components/Welcome';
 import BackendStatus from './components/BackendStatus';  
 
-// カスタムテーマの作成
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -151,7 +151,18 @@ const AppContent = () => {
               <CloseIcon />
             </IconButton>
           </Toolbar>
-          <ProblemList onClose={toggleDrawer} />
+          <List>
+            <ListItem>
+              <ListItemButton component={Link} to="/problems" onClick={toggleDrawer}>
+                <ListItemText primary="Problem List" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem>
+              <ListItemButton component={Link} to="/leaderboard" onClick={toggleDrawer}>
+                <ListItemText primary="Leaderboard" />
+              </ListItemButton>
+            </ListItem>
+          </List>
         </Drawer>
         <Box
           component="main"
@@ -162,6 +173,7 @@ const AppContent = () => {
             <Route path="/problems/:problemName" element={<ProblemDetail />} />
             <Route path="/result/:taskId" element={<SubmissionResult />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/problems" element={<ProblemListPage />} /> {/* 追加 */}
             <Route path="/" element={<Welcome />} />
           </Routes>
         </Box>
@@ -187,7 +199,7 @@ const AppContent = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      <BackendStatus /> {/* 追加 */}
+      <BackendStatus />
     </>
   );
 }
