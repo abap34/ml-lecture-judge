@@ -110,7 +110,6 @@ def calculate_user_scores(db: Session) -> list[UserLeaderBoardRow]:
         .all()
     )
 
-    print(results)
 
     return [
         UserLeaderBoardRow(
