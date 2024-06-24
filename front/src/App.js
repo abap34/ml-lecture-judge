@@ -10,6 +10,7 @@ import ProblemDetail from './components/ProblemDetail';
 import ProblemList from './components/ProblemList';
 import SubmissionResult from './components/SubmissionResult';
 import Welcome from './components/Welcome';
+import BackendStatus from './components/BackendStatus';  
 
 // カスタムテーマの作成
 const theme = createTheme({
@@ -186,6 +187,7 @@ const AppContent = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <BackendStatus /> {/* 追加 */}
     </>
   );
 }
