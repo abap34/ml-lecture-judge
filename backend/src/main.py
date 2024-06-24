@@ -173,6 +173,8 @@ def get_icon_url(token: str) -> str:
 async def login_status(request: Request):
     id_token = load_token(request)
 
+    print(get_user_name(id_token), "is online.")
+
     if id_token:
         return {"logged_in": True}
     else:
@@ -288,13 +290,6 @@ async def submit_code(
         request.code,
     )
     return {"task_id": task.id, "status": "Submitted"}
-
-
-@app.get("/reset_db/are_you_sure")
-def reset_db():
-    init_db()
-    return {"status": "OK"}
-
 
 @app.get(
     "/result/{task_id}",
