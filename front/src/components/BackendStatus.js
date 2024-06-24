@@ -9,9 +9,9 @@ const BackendStatus = () => {
     const checkBackendStatus = async () => {
       try {
         await axios.get(`${process.env.REACT_APP_API_URL}/`);
-        setStatus('Backend is running');
+        setStatus('Judge server status: OK');
       } catch (error) {
-        setStatus('Backend is not running');
+        setStatus('Judge server status: Stopping');
       }
     };
 
