@@ -60,6 +60,8 @@ class CodeSubmission(BaseModel):
 class ProblemSummary(BaseModel):
     name: str
     title: str
+    section: int
+    point: int
 
 JudgeQueueStatus = Literal["Pending", "Running", "Completed"]
 

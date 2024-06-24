@@ -349,8 +349,12 @@ def get_problems():
                     "name": problem_name,
                     "title": summary["title"],
                     "section": summary["section"],
+                    "points": summary["points"],
                 }
             )
+
+        # まず section でソート、次に points でソート
+        response = sorted(response, key=lambda x: (x["section"], x["points"]))
 
     return response
 
