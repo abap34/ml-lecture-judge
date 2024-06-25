@@ -13,22 +13,23 @@ from authlib.integrations.starlette_client import OAuth
 from db import (
     SessionLocal,
     add_submission,
+    add_user,
     calculate_team_scores,
     calculate_user_scores,
     get_submission,
-    add_user,
     init_db,
+    solve_user_count,
     update_submission,
 )
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2AuthorizationCodeBearer
-from tasks import evaluate_code
 from models import CodeSubmission, ProblemDetail, ProblemSummary, SubmissionResult
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
+from tasks import evaluate_code
 
 client_id = os.getenv("TRAQ_CLIENT_ID")
 client_secret = os.getenv("TRAQ_CLIENT_SECRET")
@@ -73,7 +74,14 @@ oauth.register(
 )
 
 if not all([client_id, client_secret, secret_key, api_url, front_url, current_section]):
-    for key in ["TRAQ_CLIENT_ID", "TRAQ_CLIENT_SECRET", "SECRET_KEY", "API_URL", "FRONT_URL", "CURRENT_SECTION"]:
+    for key in [
+        "TRAQ_CLIENT_ID",
+        "TRAQ_CLIENT_SECRET",
+        "SECRET_KEY",
+        "API_URL",
+        "FRONT_URL",
+        "CURRENT_SECTION",
+    ]:
         if not os.getenv(key):
             raise ValueError(f"{key} is not set")
 
@@ -165,6 +173,7 @@ def get_payload(token: str) -> dict:
 def get_user_name(token: str) -> str:
     return get_payload(token)["name"]
 
+
 def get_icon_url(token: str) -> str:
     return get_payload(token)["picture"]
 
@@ -191,6 +200,7 @@ async def traq_name(request: Request):
     except (KeyError, IndexError, json.JSONDecodeError) as e:
         raise HTTPException(status_code=400, detail=f"Token decoding error: {str(e)}")
 
+
 @app.get("/icon_url", dependencies=[Depends(verify_user)])
 async def icon_url(request: Request):
     id_token = load_token(request)
@@ -210,13 +220,12 @@ async def login(request: Request):
 
 # トークンを受け取り、2000 文字ずつに分割
 def split_token(token: str) -> List[str]:
-    tokens = [token[i:i + 2000] for i in range(0, len(token), 2000)]
+    tokens = [token[i : i + 2000] for i in range(0, len(token), 2000)]
     if len(tokens) > MAX_SPLIT_TOKEN:
         raise ValueError(f"Token is too long: {len(token)}")
-    
+
     assert len("".join(tokens)) == len(token)
     return tokens
-
 
 
 @app.route("/auth")
@@ -289,6 +298,7 @@ async def submit_code(
         request.code,
     )
     return {"task_id": task.id, "status": "Submitted"}
+
 
 @app.get(
     "/result/{task_id}",
@@ -366,6 +376,7 @@ def get_problems():
 
     return response
 
+
 @app.get(
     "/problems/{problem_name}",
     response_model=ProblemDetail,
@@ -392,6 +403,13 @@ def get_user_leaderboard(db: Session = Depends(get_db)):
 def get_team_leaderboard(db: Session = Depends(get_db)):
     team_scores = calculate_team_scores(db)
     return team_scores
+
+
+@app.get(
+    "/problems/{problem_name}/solved_user_count", dependencies=[Depends(verify_user)]
+)
+def get_solved_user_count(problem_name: str, db: Session = Depends(get_db)):
+    return {"count": solve_user_count(db, problem_name)}
 
 
 if __name__ == "__main__":

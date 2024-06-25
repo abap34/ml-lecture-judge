@@ -194,3 +194,10 @@ def calculate_team_scores(db: Session) -> list[TeamLeaderBoardRow]:
         )
         for team_id, name, total_score, total_submissions in results
     ]
+
+
+def solve_user_count(db: Session, problem_name: str) -> int:
+    return db.query(Submission.user_id).filter(
+        Submission.problem_name == problem_name,
+        Submission.status == "AC"
+    ).distinct().count()
