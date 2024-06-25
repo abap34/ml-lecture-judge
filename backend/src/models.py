@@ -20,7 +20,7 @@ class User(Base):
     id = Column(String, primary_key=True, index=True)
     created_at = Column(TIMESTAMP, default=jst_now)
     icon_url = Column(String, nullable=True)
-
+    team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)
 
 class Team(Base):
     __tablename__ = "teams"
