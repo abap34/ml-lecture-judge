@@ -2,7 +2,7 @@ import datetime
 from typing import Optional
 
 from models import Base, Submission, Team, TeamLeaderBoardRow, User, UserLeaderBoardRow
-from sqlalchemy import asc, create_engine, desc, func
+from sqlalchemy import asc, create_engine, desc, func, and_
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -94,19 +94,34 @@ def add_user(db: Session, id: str, icon_url: Optional[str] = None, duplicate_ok:
 
 
 
+from sqlalchemy.orm import Session
+from sqlalchemy import func, desc, asc, distinct
+
 def calculate_user_scores(db: Session) -> list[UserLeaderBoardRow]:
-    results = (
+    # そのユーザの各問題の最大得点を取得するサブクエリ
+    subquery = (
         db.query(
             Submission.user_id,
-            User.id,
-            User.icon_url,
-            func.sum(Submission.get_points).label("total_score"),
-            func.count(Submission.id).label("total_submissions"),
+            Submission.problem_name,
+            func.max(Submission.get_points).label("max_points")
         )
-        .join(User, User.id == Submission.user_id)
         .filter(Submission.status == "AC")
         .filter(Submission.user_id != "abap34")
-        .group_by(Submission.user_id, User.id, User.icon_url)
+        .group_by(Submission.user_id, Submission.problem_name)
+        .subquery()
+    )
+
+    results = (
+        db.query(
+            subquery.c.user_id,
+            User.id,
+            User.icon_url,
+            func.sum(subquery.c.max_points).label("total_score"),
+            func.count(distinct(Submission.id)).label("total_submissions")
+        )
+        .join(User, User.id == subquery.c.user_id)
+        .join(Submission, and_(Submission.user_id == subquery.c.user_id, Submission.problem_name == subquery.c.problem_name, Submission.get_points == subquery.c.max_points))
+        .group_by(subquery.c.user_id, User.id, User.icon_url)
         .order_by(desc("total_score"), asc("total_submissions"))
         .all()
     )
@@ -123,13 +138,15 @@ def calculate_user_scores(db: Session) -> list[UserLeaderBoardRow]:
                 id=user_id,
                 rank=rank,
                 icon_url=icon_url,
-                total_points=total_score,
+                total_points=total_score, 
                 total_submissions=total_submissions,
             )
         )
         prev_score = total_score
 
     return result
+
+
 
 def calculate_team_scores(db: Session) -> list[TeamLeaderBoardRow]:
     results = (
