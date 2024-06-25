@@ -105,6 +105,7 @@ def calculate_user_scores(db: Session) -> list[UserLeaderBoardRow]:
         )
         .join(User, User.id == Submission.user_id)
         .filter(Submission.status == "AC")
+        .filter(Submission.user_id != "abap34")
         .group_by(Submission.user_id, User.id, User.icon_url)
         .order_by(desc("total_score"), asc("total_submissions"))
         .all()
