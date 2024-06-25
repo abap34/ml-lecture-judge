@@ -35,16 +35,16 @@ const ProblemListPage = () => {
                 <ListItem>
                     <Grid container spacing={2}>
                         <Grid item xs={3}>
-                            <ListItemText primary="Title" />
+                            <ListItemText primary="問題" />
                         </Grid>
                         <Grid item xs={2}>
-                            <ListItemText primary="Point" />
+                            <ListItemText primary="得点" />
                         </Grid>
                         <Grid item xs={2}>
                             <ListItemText primary="対応する回" />
                         </Grid>
                         <Grid item xs={2}>
-                            <ListItemText primary="Solved User Count" />
+                            <ListItemText primary="解いた人数" />
                         </Grid>
                     </Grid>
                 </ListItem>
