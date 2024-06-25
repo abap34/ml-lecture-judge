@@ -2,7 +2,7 @@ import datetime
 from typing import Optional
 
 from models import Base, Submission, Team, TeamLeaderBoardRow, User, UserLeaderBoardRow
-from sqlalchemy import asc, create_engine, desc, func, and_
+from sqlalchemy import and_, asc, create_engine, desc, distinct, func
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -79,7 +79,9 @@ def get_submission(db: Session, submission_id: str) -> Submission:
     return submission
 
 
-def add_user(db: Session, id: str, icon_url: Optional[str] = None, duplicate_ok: bool = False) -> None:
+def add_user(
+    db: Session, id: str, icon_url: Optional[str] = None, duplicate_ok: bool = False
+) -> None:
     user = User(id=id, icon_url=icon_url)
     if not duplicate_ok:
         db.add(user)
@@ -93,17 +95,13 @@ def add_user(db: Session, id: str, icon_url: Optional[str] = None, duplicate_ok:
             db.refresh(user)
 
 
-
-from sqlalchemy.orm import Session
-from sqlalchemy import func, desc, asc, distinct
-
 def calculate_user_scores(db: Session) -> list[UserLeaderBoardRow]:
-    # そのユーザの各問題の最大得点を取得するサブクエリ
+    # 最高得点を取得するサブクエリ
     subquery = (
         db.query(
             Submission.user_id,
             Submission.problem_name,
-            func.max(Submission.get_points).label("max_points")
+            func.max(Submission.get_points).label("max_points"),
         )
         .filter(Submission.status == "AC")
         .filter(Submission.user_id != "abap34")
@@ -111,17 +109,39 @@ def calculate_user_scores(db: Session) -> list[UserLeaderBoardRow]:
         .subquery()
     )
 
-    results = (
+    # (user_id, problem_name) で一つだけ取る
+    distinct_scores = (
         db.query(
             subquery.c.user_id,
+            subquery.c.problem_name,
+            subquery.c.max_points,
+            func.min(Submission.id).label(
+                "submission_id"
+            ),  # 最初の submission_id を取得
+        )
+        .join(
+            Submission,
+            and_(
+                Submission.user_id == subquery.c.user_id,
+                Submission.problem_name == subquery.c.problem_name,
+                Submission.get_points == subquery.c.max_points,
+            ),
+        )
+        .group_by(subquery.c.user_id, subquery.c.problem_name, subquery.c.max_points)
+        .subquery()
+    )
+
+    # 合計スコア
+    results = (
+        db.query(
+            distinct_scores.c.user_id,
             User.id,
             User.icon_url,
-            func.sum(subquery.c.max_points).label("total_score"),
-            func.count(distinct(Submission.id)).label("total_submissions")
+            func.sum(distinct_scores.c.max_points).label("total_score"),
+            func.count(distinct_scores.c.submission_id).label("total_submissions"),
         )
-        .join(User, User.id == subquery.c.user_id)
-        .join(Submission, and_(Submission.user_id == subquery.c.user_id, Submission.problem_name == subquery.c.problem_name, Submission.get_points == subquery.c.max_points))
-        .group_by(subquery.c.user_id, User.id, User.icon_url)
+        .join(User, User.id == distinct_scores.c.user_id)
+        .group_by(distinct_scores.c.user_id, User.id, User.icon_url)
         .order_by(desc("total_score"), asc("total_submissions"))
         .all()
     )
@@ -138,14 +158,13 @@ def calculate_user_scores(db: Session) -> list[UserLeaderBoardRow]:
                 id=user_id,
                 rank=rank,
                 icon_url=icon_url,
-                total_points=total_score, 
+                total_points=total_score,
                 total_submissions=total_submissions,
             )
         )
         prev_score = total_score
 
     return result
-
 
 
 def calculate_team_scores(db: Session) -> list[TeamLeaderBoardRow]:
