@@ -1,4 +1,4 @@
-import { List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
+import { List, ListItem, ListItemButton, ListItemText, Typography, Grid } from '@mui/material';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -26,17 +26,33 @@ const ProblemListPage = () => {
             </Typography>
             <List>
                 <ListItem>
-                    <ListItemText primary="Title" />
-                    <ListItemText primary="Point" />
-                    <ListItemText primary="対応する回" />
+                    <Grid container spacing={2}>
+                        <Grid item xs={4}>
+                            <ListItemText primary="Title" />
+                        </Grid>
+                        <Grid item xs={4}>
+                            <ListItemText primary="Point" />
+                        </Grid>
+                        <Grid item xs={4}>
+                            <ListItemText primary="対応する回" />
+                        </Grid>
+                    </Grid>
                 </ListItem>
 
                 {Array.isArray(problems) && problems.map((problem) => (
                     <ListItem key={problem.name}>
                         <ListItemButton component={Link} to={`/problems/${problem.name}`}>
-                            <ListItemText primary={problem.title} />
-                            <ListItemText primary={problem.point} />
-                            <ListItemText primary={problem.section} />
+                            <Grid container spacing={2}>
+                                <Grid item xs={4}>
+                                    <ListItemText primary={problem.title} />
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <ListItemText primary={problem.point} />
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <ListItemText primary={problem.section} />
+                                </Grid>
+                            </Grid>
                         </ListItemButton>
                     </ListItem>
                 ))}
