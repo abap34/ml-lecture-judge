@@ -173,9 +173,8 @@ def get_icon_url(token: str) -> str:
 async def login_status(request: Request):
     id_token = load_token(request)
 
-    print(get_user_name(id_token), "is online.")
-
     if id_token:
+        print(get_user_name(id_token), "is online.")
         return {"logged_in": True}
     else:
         return {"logged_in": False}
