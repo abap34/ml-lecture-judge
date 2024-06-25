@@ -1,38 +1,30 @@
 $\boldsymbol{x} \in \mathbb{R}^n$ と $\boldsymbol{y} \in \mathbb{R}^n$ が与えられます。
-$y_i$ を、パラメータ $\alpha \in \mathbb{R}, \beta \in \mathbb{R}$ を用いて直線 $\alpha + \beta x_i$ で近似することを考えます。
-平均二乗誤差 $L(\alpha, \beta) = \dfrac{1}{n} \sum_{k=1}^{n} \{y_i - (\alpha + \beta x_i)\}^2$ を最小化する $\alpha, \beta$ を $\hat{\alpha}, \hat{\beta}$ とするとき、
-$ L(\hat{\alpha}, \hat{\beta}) $ を出力してください。
-相対誤差または絶対誤差が $10^{-2}$ 以下であれば正解とします。
 
-<details>
-<summary>ヒント</summary>
+$y_i$ を、パラメータ $a \in \mathbb{R}, b \in \mathbb{R}$ を用いてモデル $f(x_i; a, b) = a + b x_i$ で予測することを考えます。
 
-勾配降下法だと時間がかかるので、$\alpha, \beta$ について$L(\alpha, \beta)$ を偏微分して、それぞれの偏微分が0になるような $\alpha, \beta$ を求めましょう。
+平均二乗誤差 $L$ を最小にする $a, b$ を $\hat{a}, \hat{b}$ とします。 $L(\hat{a}, \hat{b})$ を出力してください。
 
-</details>
+<span style="color: red; "> ※この問題は、解析的に解くことができます。</span>
 
 ## 制約
 
+- $n$ は整数
 - $2 \leq n \leq 50$
 - $-10^3 \leq x_i, y_i \leq 10^3$
 
-$n$ は整数です。
-$\bar{x} = \dfrac{1}{n} \sum_{k=1}^{n} x_i$ とするとき、
-$\sum_{k=1}^{n} (x_i - \bar{x}) \ne 0$ であることが保証されています。
+また、$\bar{x} = \dfrac{1}{n} \sum_{k=1}^{n} x_i$ とするとき、$\sum_{k=1}^{n} (x_i - \bar{x}) \ne 0$ であることが保証されています。
 
 ## 入力
 入力は以下の形式で標準入力から与えられます。
 
-$$
+```plaintext
 n
-\newline
-x_1 \ x_2 \ \ldots \ x_n
-\newline
-y_1 \ y_2 \ \ldots \ y_n
-\newline
-$$
+x_1 x_2 ... x_n
+y_1 y_2 ... y_n
+```
 
-従って以下のコードで入力を受け取ることができます。
+したがって、以下のようなコードで入力を受け取ることができます。
+
 ```python3
 n = int(input())
 x = np.array(list(map(float, input().split())))
@@ -42,10 +34,11 @@ y = np.array(list(map(float, input().split())))
 
 ## 出力
 
-求めた $\hat{\alpha}, \hat{\beta}$ について、近似結果の平均二乗誤差を出力してください。
-$$
-L(\hat{\alpha}, \hat{\beta})
-$$
+$L(\hat{a}, \hat{b})$ を出力してください。
+
+想定解との相対誤差または絶対誤差が $10^{-2}$ 以下であれば正解とします。
+
+ここで、想定解と真の値の絶対誤差または相対誤差は $10^{-8}$ 以下であることが保証されています。
 
 ## サンプル
 
@@ -58,14 +51,13 @@ $$
 6
 -0.5 0.75 2.0 2.3 3.0 3.75
 0.0 1.0 2.0 3.0 4.0 5.0
-
 ```
 
 #### 出力
 ```plaintext
 0.07367
 ```
-相対誤差または絶対誤差が $10^{-2}$ 以下であれば正解とします。
+
 
 ### サンプル2
 
