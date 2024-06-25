@@ -2,7 +2,13 @@ $\boldsymbol{x} \in \mathbb{R}^n$ と $\boldsymbol{y} \in \mathbb{R}^n$ が与�
 
 $y_i$ を、パラメータ $a \in \mathbb{R}, b \in \mathbb{R}$ を用いてモデル $f(x_i; a, b) = a + b x_i$ で予測することを考えます。
 
-平均二乗誤差 $L$ を最小にする $a, b$ を $\hat{a}, \hat{b}$ とします。 $L(\hat{a}, \hat{b})$ を出力してください。
+平均二乗誤差 $L$ を以下のように定義します。
+
+$$
+L(a, b) = \frac{1}{n} \sum_{i=1}^{n} (y_i - f(x_i; a, b))^2
+$$
+
+$L$ の最小値を求めてください。
 
 <span style="color: red; "> ※この問題は、勾配降下法で解くことを想定していません。
 </span>
@@ -18,7 +24,7 @@ $y_i$ を、パラメータ $a \in \mathbb{R}, b \in \mathbb{R}$ を用いてモ
 - $n$ は整数
 - $2 \leq n \leq 50$
 - $-10^3 \leq x_i, y_i \leq 10^3$
-- $\bar{x} = \dfrac{1}{n} \displaystyle \sum_{k=1}^{n} x_i$ とするとき、$\displaystyle \sum_{k=1}^{n} (x_i - \bar{x}) \ne 0$ 
+- $\bar{x} = \dfrac{1}{n} \displaystyle \sum_{k=1}^{n} x_i$ とするとき、$\displaystyle \sum_{k=1}^{n} (x_i - \bar{x})^2 \ne 0$ 
 
 ## 入力
 入力は以下の形式で標準入力から与えられます。
@@ -40,9 +46,9 @@ y = np.array(list(map(float, input().split())))
 
 ## 出力
 
-$L(\hat{a}, \hat{b})$ を出力してください。
+$L$ の最小値を出力してください。
 
-想定解との相対誤差または絶対誤差が $10^{-2}$ 以下であれば正解とします。
+想定解との相対誤差または絶対誤差が $10^{-2}$ 以下であれば正解として扱われます。
 
 ここで、想定解と真の値の絶対誤差または相対誤差は $10^{-5}$ 以下であることが保証されています。
 
