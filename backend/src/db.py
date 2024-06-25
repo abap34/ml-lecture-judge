@@ -111,17 +111,25 @@ def calculate_user_scores(db: Session) -> list[UserLeaderBoardRow]:
         .all()
     )
 
-
-    return [
-        UserLeaderBoardRow(
-            id=user_id,
-            icon_url=icon_url,
-            total_points=total_score,
-            total_submissions=total_submissions,
+    # ポイント同じならランク同じで計算
+    result = []
+    rank = 1
+    prev_score = -1
+    for user_id, user_id, icon_url, total_score, total_submissions in results:
+        if prev_score != total_score:
+            rank += 1
+        result.append(
+            UserLeaderBoardRow(
+                id=user_id,
+                rank=rank,
+                icon_url=icon_url,
+                total_points=total_score,
+                total_submissions=total_submissions,
+            )
         )
-        for user_id, user_id, icon_url, total_score, total_submissions in results
-    ]
+        prev_score = total_score
 
+    return result
 
 def calculate_team_scores(db: Session) -> list[TeamLeaderBoardRow]:
     results = (

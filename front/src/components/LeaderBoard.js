@@ -48,7 +48,7 @@ const Leaderboard = () => {
           <TableBody>
             {userScores.map((user, index) => (
               <TableRow key={user.id}>
-                <TableCell>{index + 1}</TableCell>
+                <TableCell>{user.rank}</TableCell>
                 <TableCell>
                   <Avatar src={user.icon_url} />
                 </TableCell>

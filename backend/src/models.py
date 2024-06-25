@@ -80,6 +80,7 @@ class ProblemDetail(BaseModel):
 
 class UserLeaderBoardRow(BaseModel):
     id: str
+    rank: int
     icon_url: str
     total_points: int
     total_submissions: int
