@@ -7,7 +7,7 @@ summary:
 # 制約
 constraints:
   # 実行時間制限 (ミリ秒)
-  time: 2000
+  time: 10000
   # メモリ制限 (MB)
   memory: 256
   # 誤差ジャッジをするか？
