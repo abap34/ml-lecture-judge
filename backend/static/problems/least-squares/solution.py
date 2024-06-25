@@ -3,8 +3,8 @@ import numpy as np
 
 # take input
 n = int(input())
-y = list(map(float, input().split()))
 x = list(map(float, input().split()))
+y = list(map(float, input().split()))
 
 # convert to numpy array
 y = np.array(y)

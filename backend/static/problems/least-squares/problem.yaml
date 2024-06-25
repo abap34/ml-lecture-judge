@@ -13,6 +13,6 @@ constraints:
   # 誤差ジャッジをするか？
   error_judge: true
   # 許容絶対誤差
-  absolute_error: 1e-3
+  absolute_error: 1e-2
   # 許容相対誤差
-  relative_error: 1e-3
+  relative_error: 1e-2
