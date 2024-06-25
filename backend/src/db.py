@@ -113,7 +113,7 @@ def calculate_user_scores(db: Session) -> list[UserLeaderBoardRow]:
 
     # ポイント同じならランク同じで計算
     result = []
-    rank = 1
+    rank = 0
     prev_score = -1
     for user_id, user_id, icon_url, total_score, total_submissions in results:
         if prev_score != total_score:
