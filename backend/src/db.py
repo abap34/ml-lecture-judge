@@ -88,8 +88,9 @@ def add_user(
         db.commit()
         db.refresh(user)
     else:
-        # いたら何もしない
+        # いたら何もしない. いなければ追加
         if db.query(User).filter(User.id == id).first() is None:
+            user.team_id = "チームなし"
             db.add(user)
             db.commit()
             db.refresh(user)
