@@ -2,9 +2,8 @@
 import torch
 
 lr = 0.01
-
-x = float(input())
-x = torch.tensor(x, requires_grad=True)
+N = 10001
+x = torch.tensor(3.0, requires_grad=True)
 
 
 def f(x):
