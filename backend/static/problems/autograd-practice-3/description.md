@@ -1,5 +1,5 @@
 # Description
-3. $W = \begin{pmatrix}
+$W = \begin{pmatrix}
 1.0 & 2.0 & 3.0 \\
 4.0 & 5.0 & 6.0 \end{pmatrix}, \boldsymbol{x}_1 = (1.0, 2.0), \boldsymbol{x}_2 = (1.0,2.0,3.0)^T$について、$y = \boldsymbol{x}_1 W \boldsymbol{x}_2$ の勾配をPyTorchを使って求めてください。
 
