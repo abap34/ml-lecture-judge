@@ -17,6 +17,6 @@ ans_x2 = x2.grad
 
 
 # 回答を出力
-print(*ans_W.numpy().flatten().tolist())
-print(*ans_x1.numpy().flatten().tolist())
-print(*ans_x2.numpy().flatten().tolist())
+print(*ans_W.numpy().flatten())
+print(*ans_x1.numpy().flatten())
+print(*ans_x2.numpy().flatten())

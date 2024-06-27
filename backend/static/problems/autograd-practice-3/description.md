@@ -13,9 +13,9 @@ PyTorchにおいて、行列積は`torch.matmul`を使って計算できます�
 $W$ 、$\boldsymbol{x}_1$、$\boldsymbol{x}_2$ についての勾配をそれぞれ改行区切りで出力してください。
 PyTorchで求まるそれぞれの勾配は `torch.tensor` オブジェクトになりますが、
 出力する際は `.flatten()` メソッドを用いてそれぞれの配列を一次元の配列に変換したうえで、その配列の要素を空白区切りで出力してください。
-この問題の答えをそれぞれ `ans_W`, `ans_x1`,`ans_x2` とするとき、以下のコードに従うと正しい形式で出力ができます。
+この問題の答えをそれぞれ `ans_W`, `ans_x1`, `ans_x2` とするとき、以下のコードに従うと正しい形式で出力ができます。
 ```python
-print(*ans_W.flatten().numpy().tolist())
-print(*ans_x1.flatten().numpy().tolist())
-print(*ans_x2.flatten().numpy().tolist())
+print(*ans_W.flatten().numpy())
+print(*ans_x1.flatten().numpy())
+print(*ans_x2.flatten().numpy())
 ``` 
