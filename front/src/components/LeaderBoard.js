@@ -49,7 +49,7 @@ const Leaderboard = () => {
           <TableBody>
             {teamScores.map((team, index) => (
               <TableRow key={team.id}>
-                <TableCell>{index + 1}</TableCell>
+                <TableCell>{team.rank}</TableCell>
                 <TableCell>{team.name}</TableCell>
                 <TableCell>
                   <AvatarGroup max={4}>
@@ -66,7 +66,7 @@ const Leaderboard = () => {
         </Table>
       </TableContainer>
 
-      
+
       <Typography variant="h4" gutterBottom>
         User Leaderboard
       </Typography>
