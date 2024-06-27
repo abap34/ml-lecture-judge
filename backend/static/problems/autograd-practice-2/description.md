@@ -1,6 +1,7 @@
 # Description
 $y = f(\boldsymbol{x}) = x_1^2 + x_2^2 + x_3^2$ の $\boldsymbol{x}=(1.0, 2.0, 3.0)^T$ における勾配をPyTorchを使って求めてください。
 
+なお、次元 $n$ の縦ベクトルは形状 $(n, 1)$ の `torch.tensor` オブジェクトとして表現してください。
 ## 入力
 なし
 
