@@ -36,7 +36,7 @@ $$
 
 
 <figure>
-    <img src="adam1.png" width="400">
+    <img src="adam_optimize.png" width="400">
     <figcaption> Adamによる更新の様子[3] </figcaption>
 </figure>
 
@@ -62,7 +62,7 @@ $x_0 \quad y_0$
 
 $x_{N} \quad y_{N}$
 
-想定解との絶対誤差または相対誤差が $10^{-5}$ 以下であれば正解とします。
+想定解との絶対誤差または相対誤差が $10^{-2}$ 以下であれば正解とします。
 
 # 入力例1
 

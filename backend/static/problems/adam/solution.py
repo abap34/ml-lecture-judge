@@ -41,7 +41,7 @@ class Adam:
         param += delta_w
 
 
-# Matyas Functionと呼ばれる最適化のテスト用の関数
+# Matyas Function と呼ばれる最適化のテスト用の関数
 def L(w):
     x, y = w
     z = 0.26 + (x ** 2 + y ** 2) + 0.48 * x * y
