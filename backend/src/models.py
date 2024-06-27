@@ -83,4 +83,4 @@ class TeamLeaderBoardRow(BaseModel):
     total_points: int
     total_submissions: int
     members: list[str]
-    
+    icon_urls: list[str]

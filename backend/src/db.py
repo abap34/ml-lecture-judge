@@ -172,6 +172,10 @@ def get_members(db: Session, team_id: str) -> list[str]:
     members =  db.query(User.id).filter(User.team_id == team_id).all()
     return [member[0] for member in members]
 
+def get_icon_urls(db: Session, team_id: str) -> list[str]:
+    icon_urls =  db.query(User.icon_url).filter(User.team_id == team_id).all()
+    return [icon_url[0] for icon_url in icon_urls]
+
 def calculate_team_scores(db: Session) -> list[TeamLeaderBoardRow]:
     # 最高得点を取得するサブクエリ
     subquery = (
@@ -226,6 +230,7 @@ def calculate_team_scores(db: Session) -> list[TeamLeaderBoardRow]:
     for team_id, total_score, total_submissions in results:
         if prev_score != total_score:
             rank += 1
+
         result.append(
             TeamLeaderBoardRow(
                 name=team_id,
@@ -233,6 +238,7 @@ def calculate_team_scores(db: Session) -> list[TeamLeaderBoardRow]:
                 total_points=total_score,
                 total_submissions=total_submissions,
                 members=get_members(db, team_id),
+                icon_urls=get_icon_urls(db, team_id)
             )
         )
         prev_score = total_score
