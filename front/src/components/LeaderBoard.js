@@ -1,4 +1,4 @@
-import { Avatar, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Avatar, AvatarGroup, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 
@@ -39,14 +39,14 @@ const Leaderboard = () => {
           <TableHead>
             <TableRow>
               <TableCell>Rank</TableCell>
-              <TableCell>Icon</TableCell>
+              <TableCell></TableCell>
               <TableCell>Username</TableCell>
               <TableCell>Total Points</TableCell>
-              <TableCell>Total Submissions</TableCell>
+              <TableCell>Total AC</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {userScores.map((user, index) => (
+            {userScores.map((user) => (
               <TableRow key={user.id}>
                 <TableCell>{user.rank}</TableCell>
                 <TableCell>
@@ -70,8 +70,9 @@ const Leaderboard = () => {
             <TableRow>
               <TableCell>Rank</TableCell>
               <TableCell>Team Name</TableCell>
+              <TableCell></TableCell>
               <TableCell>Total Points</TableCell>
-              <TableCell>Total Submissions</TableCell>
+              <TableCell>Total AC</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -79,6 +80,13 @@ const Leaderboard = () => {
               <TableRow key={team.id}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{team.name}</TableCell>
+                <TableCell>
+                  <AvatarGroup max={4}>
+                    {team.icon_urls.map((url, idx) => (
+                      <Avatar key={idx} src={url} />
+                    ))}
+                  </AvatarGroup>
+                </TableCell>
                 <TableCell>{team.total_points}</TableCell>
                 <TableCell>{team.total_submissions}</TableCell>
               </TableRow>
