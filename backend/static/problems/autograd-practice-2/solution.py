@@ -8,4 +8,4 @@ y.backward()
 ans_x = x.grad
 
 # 回答を出力
-print(*ans_x.numpy().flatten().tolist())
+print(*ans_x.numpy().flatten())
