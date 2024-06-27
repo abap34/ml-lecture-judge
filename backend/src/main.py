@@ -19,6 +19,7 @@ from db import (
     get_submission,
     init_db,
     solve_user_count,
+    get_teamid,
     update_submission,
 )
 from fastapi import Depends, FastAPI, HTTPException, Request
@@ -257,7 +258,6 @@ async def auth(request: Request):
 
     return response
 
-
 @app.post("/submit/{problem_name}")
 async def submit_code(
     request: CodeSubmission,
@@ -290,13 +290,17 @@ async def submit_code(
             memorylimit,
         )
 
+    team_id = get_teamid(db, request.userid)
+
     add_submission(
         db,
         task.id,
         request.problem_name,
         request.userid,
         request.code,
+        team_id=team_id,
     )
+    
     return {"task_id": task.id, "status": "Submitted"}
 
 
