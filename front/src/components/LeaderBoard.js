@@ -31,37 +31,8 @@ const Leaderboard = () => {
 
   return (
     <Container>
-      <Typography variant="h4" gutterBottom>
-        User Leaderboard
-      </Typography>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Rank</TableCell>
-              <TableCell></TableCell>
-              <TableCell>Username</TableCell>
-              <TableCell>Total Points</TableCell>
-              <TableCell>Total AC</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {userScores.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.rank}</TableCell>
-                <TableCell>
-                  <Avatar src={user.icon_url} />
-                </TableCell>
-                <TableCell>{user.id}</TableCell>
-                <TableCell>{user.total_points}</TableCell>
-                <TableCell>{user.total_submissions}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
 
-      <Typography variant="h4" gutterBottom style={{ marginTop: '20px' }}>
+<Typography variant="h4" gutterBottom style={{ marginTop: '20px' }}>
         Team Leaderboard
       </Typography>
       <TableContainer component={Paper}>
@@ -89,6 +60,37 @@ const Leaderboard = () => {
                 </TableCell>
                 <TableCell>{team.total_points}</TableCell>
                 <TableCell>{team.total_submissions}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      
+      <Typography variant="h4" gutterBottom>
+        User Leaderboard
+      </Typography>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Rank</TableCell>
+              <TableCell></TableCell>
+              <TableCell>Username</TableCell>
+              <TableCell>Total Points</TableCell>
+              <TableCell>Total AC</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {userScores.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell>{user.rank}</TableCell>
+                <TableCell>
+                  <Avatar src={user.icon_url} />
+                </TableCell>
+                <TableCell>{user.id}</TableCell>
+                <TableCell>{user.total_points}</TableCell>
+                <TableCell>{user.total_submissions}</TableCell>
               </TableRow>
             ))}
           </TableBody>
