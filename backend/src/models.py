@@ -22,14 +22,6 @@ class User(Base):
     icon_url = Column(String, nullable=True)
     team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)
 
-class Team(Base):
-    __tablename__ = "teams"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True, nullable=False)
-    created_at = Column(TIMESTAMP, default=jst_now)
-    updated_at = Column(TIMESTAMP, default=jst_now)
-
-
 class TeamMember(Base):
     __tablename__ = "team_members"
     user_id = Column(String, primary_key=True)
@@ -86,10 +78,9 @@ class UserLeaderBoardRow(BaseModel):
     total_submissions: int
 
 class TeamLeaderBoardRow(BaseModel):
-    id: int
     name: str
+    rank: int
     total_points: int
     total_submissions: int
-    created_at: datetime
-    updated_at: datetime
     members: list[str]
+    
