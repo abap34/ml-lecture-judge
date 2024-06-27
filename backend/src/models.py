@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal, Optional, Union
 from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel
@@ -53,7 +53,7 @@ class ProblemSummary(BaseModel):
     name: str
     title: str
     section: int
-    point: int
+    point: Union[int, str]
 
 JudgeQueueStatus = Literal["Pending", "Running", "Completed"]
 

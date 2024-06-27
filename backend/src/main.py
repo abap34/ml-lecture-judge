@@ -300,7 +300,7 @@ async def submit_code(
         request.code,
         team_id=team_id,
     )
-    
+
     return {"task_id": task.id, "status": "Submitted"}
 
 
@@ -376,7 +376,11 @@ def get_problems():
             )
 
         # まず section でソート、次に points でソート
-        response = sorted(response, key=lambda x: (x["section"], x["point"]))
+        # スペシャルジャッジとか変なのは末尾にしたいので、 point が文字列の場合は INF にする
+        def keyfunc(x):
+            return (x["section"], x["point"] if isinstance(x["point"], int) else float("inf"))
+
+        response = sorted(response, key=keyfunc)
 
     return response
 
