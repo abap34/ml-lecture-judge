@@ -1,10 +1,11 @@
-# Description
-$W = \begin{pmatrix}
-1.0 & 2.0 & 3.0 \\
-4.0 & 5.0 & 6.0 \end{pmatrix}, \boldsymbol{x}_1 = (1.0, 2.0), \boldsymbol{x}_2 = (1.0,2.0,3.0)^T$について、$y = \boldsymbol{x}_1 W \boldsymbol{x}_2$ の勾配をPyTorchを使って求めてください。
+$f(\bm{x_1}, \bm{x_2}, W) = \bm{x_1}^T W \bm{x_2}$ の
 
-なお、横ベクトルは形状が(1, n)の行列、縦ベクトルは形状が(n, 1)の行列としてPyTorch上で扱ってください。
-PyTorchにおいて、行列積は`torch.matmul`を使って計算できます。
+$W = \begin{pmatrix}
+1 & 3 & 5 \\
+2 & 4 & 6 
+\end{pmatrix}$, $\boldsymbol{x}_1 = (1.0, 2.0)^T, \boldsymbol{x}_2 = (1.0,2.0,3.0)^T$ における勾配をそれぞれ求めてください。
+
+なお、`torch.matmul(A, B)` によって `A` と `B` の行列積を計算できます。
 
 ## 入力
 なし
@@ -13,9 +14,11 @@ PyTorchにおいて、行列積は`torch.matmul`を使って計算できます�
 $W$ 、$\boldsymbol{x}_1$、$\boldsymbol{x}_2$ についての勾配をそれぞれ改行区切りで出力してください。
 PyTorchで求まるそれぞれの勾配は `torch.tensor` オブジェクトになりますが、
 出力する際は `.flatten()` メソッドを用いてそれぞれの配列を一次元の配列に変換したうえで、その配列の要素を空白区切りで出力してください。
-この問題の答えをそれぞれ `ans_W`, `ans_x1`, `ans_x2` とするとき、以下のコードに従うと正しい形式で出力ができます。
+
+つまり、この問題の答えがそれぞれ `gW`, `gx1`, `gx2` に格納されているとき、次のようにすると正しい出力になります。
+
 ```python
-print(*ans_W.flatten().numpy())
-print(*ans_x1.flatten().numpy())
-print(*ans_x2.flatten().numpy())
+print(*gW.flatten().numpy())
+print(*gx1.flatten().numpy())
+print(*gx2.flatten().numpy())
 ``` 
