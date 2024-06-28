@@ -53,7 +53,7 @@ class ExecutionResult:
         return json.dumps(self.to_dict())
 
 
-def build_command(code, input_data, time):
+def build_command(code, input_data, time, prehook_code):
     # quote して攻撃を防ぐ
     code = shlex.quote(code)
     input_data = shlex.quote(input_data)
@@ -65,7 +65,7 @@ def build_command(code, input_data, time):
         [
             "/bin/sh",
             "-c",
-            f"echo {code} > target_code.py && echo {input_data} > input.txt && python3 /app/executor.py --code target_code.py --input input.txt --time {time}",
+            f"echo {prehook_code} > prehook_code.py && python3 prehook_code.py && echo {code} > target_code.py && echo {input_data} > input.txt && python3 /app/executor.py --code target_code.py --input input.txt --time {time}",
         ]
     )
 
@@ -78,14 +78,14 @@ def build_command(code, input_data, time):
 # timelimit: int  時間制限 (ms)
 # memorylimit: int  メモリ制限 (MB)
 def run(
-    code: str, input_data: str, timelimit: int, memorylimit: int
+    code: str, input_data: str, timelimit: int, memorylimit: int, prehook_code: str = "",
 ) -> ExecutionResult:
 
     client = docker.from_env()
     try:
         log = client.containers.run(
             image="executor",
-            command=build_command(code, input_data, timelimit),
+            command=build_command(code, input_data, timelimit, prehook_code),
             mem_limit=f"{memorylimit}m",
             pids_limit=128,
             stdout=True,
@@ -143,41 +143,44 @@ JudgeResult = Literal["WJ", "AC", "WA", "RE", "TLE", "MLE", "IE"]
 
 
 class Judgement:
-    def __init__(self, status: JudgeResult, time: float, pass_cases: int):
+    def __init__(self, status: JudgeResult, time: float, pass_cases: int, point: int = 0):
         self.status = status
         self.time = time
         self.pass_cases = pass_cases
+        self.point = point
 
     def to_dict(self):
         return {
             "status": self.status,
             "time": self.time,
             "pass_cases": self.pass_cases,
+            "point": self.point,
         }
 
     def to_json(self):
         return json.dumps(self.to_dict())
 
 
-def passed(
+def normaljudge(
     output: str,
     expected: str,
     error_judge: bool,
     abs_error: Union[float, None],
     rel_error: Union[float, None],
-) -> bool:
+    max_point: int,
+) -> tuple[bool, int]:
     if error_judge:
         try:
             # 出力を2次元配列と見なして各要素を誤差ジャッジ
             output_lines = output.splitlines()
             expected_lines = expected.splitlines()
             if len(output_lines) != len(expected_lines):
-                return False
+                return (False, 0)
             for i in range(len(output_lines)):
                 outputs = output_lines[i].split()
                 expecteds = expected_lines[i].split()
                 if len(outputs) != len(expecteds):
-                    return False
+                    return (False, 0)
                 for j in range(len(outputs)):
                     output_float = float(outputs[j])
                     expected_float = float(expecteds[j])
@@ -191,20 +194,23 @@ def passed(
                         if output_float == 0:
                             continue
                         else:
-                            return False
+                            return (False, 0)
                     else:
                         if abs((output_float - expected_float) / expected_float) <= rel_error:
                             continue
-                        else :
-                            return False
+                        else:
+                            return (False, 0)
 
-            return True
+            return (True, max_point)
         except ValueError:
             # 出力が不正.
-            return False
+            return (False, 0)
     else:
         # 通常のジャッジ
-        return output == expected
+        if output == expected:
+            return (True, max_point)
+        else:
+            return (False, 0)
 
 
 @app.task(name="tasks.evaluate_code")
@@ -214,17 +220,42 @@ def evaluate_code(
     timelimit: float,
     memorylimit: float,
     error_judge: bool = False,
+    prehook_code: str = "",
+    special_judge_code: str = "",
     abs_error: Union[float, None] = None,
     rel_error: Union[float, None] = None,
+    max_point: int | str = 100    # "スペシャルジャッジ"　とかも飛んでくる
 ) -> dict:
+    
+    special_judge = special_judge_code != ""
+
     # 誤差ジャッジするなら abs_error と rel_error はどちらも指定されている必要がある
     if error_judge and (abs_error is None or rel_error is None):
         raise ValueError(
             "abs_error and rel_error must be specified when error_judge is True"
         )
+    
+    judger = normaljudge  # デフォルトでnormaljudgeを設定
+
+
+    def special_judger(*args, **kwargs):
+        raise NotImplementedError("Special judge is not implemented! Please override this function in special_judge_code")
+
+    local_vars = {}
+    
+    if special_judge:
+        print("Special judge is enabled")
+        print("Special judge code: ", special_judge_code)
+        exec(special_judge_code, globals(), local_vars)  # special_judge_codeを実行してjudger関数をローカル名前空間に定義
+        special_judger = local_vars.get("special_judger")
+        if not special_judger:
+            raise RuntimeError("Special judge function not defined in special_judge_code")
+
+    
 
     ng_cases = 0
     ok_cases = 0
+    sum_point = 0
 
     max_time = -1
     for i, testcase in enumerate(testcases):
@@ -232,8 +263,14 @@ def evaluate_code(
         output_data = testcase["output"]
         # 実行
         result: ExecutionResult = run(
-            code, input_data=input_data, timelimit=timelimit, memorylimit=memorylimit
+            code, 
+            input_data=input_data, 
+            timelimit=timelimit, 
+            memorylimit=memorylimit, 
+            prehook_code=prehook_code
         )
+
+
         status: ExecutionStatus = result.status
 
         # ノックアウトする
@@ -253,12 +290,28 @@ def evaluate_code(
         # ジャッジ. ここはノックアウトしないことに注意
         # 誤差ジャッジなら floatで読んで誤差ジャッジする.
         # 出力が不正なら WA
-        if passed(result.stdout, output_data, error_judge, abs_error, rel_error):
+        if not special_judge:
+            passed, point = judger(result.stdout, output_data, error_judge, abs_error, rel_error, max_point)
+        else:
+            passed, point = special_judger(result.stdout, output_data, error_judge, abs_error, rel_error, max_point)
+        
+        sum_point += point
+        if passed:
+            print("Test case", i, "passed")
             ok_cases += 1
         else:
+            print("Test case", i, "failed")
             ng_cases += 1
 
     if ng_cases == 0:
-        return Judgement(status="AC", time=max_time, pass_cases=ok_cases).to_dict()
+        if special_judge:
+            return Judgement(status="AC", time=max_time, pass_cases=ok_cases, point=sum_point).to_dict()
+        else:
+            return Judgement(status="AC", time=max_time, pass_cases=ok_cases, point=max_point).to_dict()
     else:
-        return Judgement(status="WA", time=max_time, pass_cases=ok_cases).to_dict()
+        return Judgement(status="WA", time=max_time, pass_cases=ok_cases, point=0).to_dict()    
+    
+
+
+        
+    

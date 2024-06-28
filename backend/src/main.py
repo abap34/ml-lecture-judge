@@ -4,6 +4,7 @@ import json
 import os
 from datetime import datetime
 from typing import Dict, List
+import pathlib
 
 import jwt
 import uvicorn
@@ -258,16 +259,42 @@ async def auth(request: Request):
 
     return response
 
+
+def get_prehook_code(problem_name: str) -> str:
+    path = pathlib.Path(f"static/problems/{problem_name}/prehook.py")
+    if path.exists():
+        with open(path) as f:
+            return f.read()
+    else:
+        return ""
+
+
+
+def get_special_judge_code(problem_name: str) -> str:
+    path = pathlib.Path(f"static/problems/{problem_name}/special_judge.py")
+    if path.exists():
+        with open(path) as f:
+            return f.read()
+    else:
+        return ""
+    
+
 @app.post("/submit/{problem_name}")
 async def submit_code(
     request: CodeSubmission,
     db: Session = Depends(get_db),
     token: str = Depends(verify_user),
 ):
+    summary = get_summary(request.problem_name)
     constraints = get_constraints(request.problem_name)
+    points = summary["points"]
     timelimit = constraints["time"]
     memorylimit = constraints["memory"]
-    error_judge = constraints.get("error_judge", False)
+    error_judge = constraints["error_judge"]
+    special_judge = constraints.get("special_judge", False)
+
+    if special_judge and error_judge:
+        raise ValueError("Special judge and error judge cannot be used at the same time")
 
     if error_judge:
         abs_error = float(constraints.get("absolute_error", None))
@@ -279,8 +306,20 @@ async def submit_code(
             timelimit,
             memorylimit,
             error_judge,
-            abs_error,
-            rel_error,
+            abs_error=abs_error,
+            rel_error=rel_error,
+            max_point = points,
+        )
+    elif special_judge:
+        print("Special Judge!")
+        task = evaluate_code.delay(
+            request.code,
+            get_all_testcases(request.problem_name),
+            timelimit,
+            memorylimit,
+            prehook_code=get_prehook_code(request.problem_name),
+            special_judge_code = get_special_judge_code(request.problem_name),
+            max_point = points,
         )
     else:
         task = evaluate_code.delay(
@@ -288,6 +327,7 @@ async def submit_code(
             get_all_testcases(request.problem_name),
             timelimit,
             memorylimit,
+            max_point = points,
         )
 
     team_id = get_teamid(db, request.userid)
@@ -314,12 +354,7 @@ def get_result(task_id: str, db: Session = Depends(get_db)):
     if task.ready():
         result = task.get()
 
-        pending_submit = get_submission(db, task_id)
-
-        if result["status"] == "AC":
-            get_points = get_summary(pending_submit.problem_name)["points"]
-        else:
-            get_points = 0
+        get_points = result["point"]
 
         update_submission(
             db,
@@ -343,6 +378,7 @@ def get_result(task_id: str, db: Session = Depends(get_db)):
                 "code": submit.code,
                 "passed_cases": submit.pass_cases,
                 "n_testcases": n_testcases(submit.problem_name),
+                "points": submit.get_points,
                 "submitted_at": submit.submitted_at,
             },
         }
