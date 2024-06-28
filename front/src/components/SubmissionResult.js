@@ -101,6 +101,10 @@ const SubmissionResult = () => {
                     <TableCell><strong>Test Cases</strong></TableCell>
                     <TableCell>{submissionResult.passed_cases}/{submissionResult.n_testcases}</TableCell>
                   </TableRow>
+                  <TableRow>
+                    <TableCell><strong>Points</strong></TableCell>
+                    <TableCell>{submissionResult.points}</TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
