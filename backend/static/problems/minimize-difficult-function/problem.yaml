@@ -1,7 +1,7 @@
 # 概要
 summary: 
-  title: minimize-difficult-function
-  points: 400
+  title: Minimize it !
+  points: スペシャルジャッジ
   section: 3
   
 # 制約
@@ -11,8 +11,9 @@ constraints:
   # メモリ制限 (MB)
   memory: 1024
   # 誤差ジャッジをするか？
-  error_judge: true
+  error_judge: false
   # 許容絶対誤差
   absolute_error: 1e-3
   # 許容相対誤差
   relative_error: 1e-3
+  special_judge: true
