@@ -1,7 +1,7 @@
-import { List, ListItem, ListItemButton, ListItemText, Typography, Grid } from '@mui/material';
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper } from '@mui/material';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const ProblemListPage = () => {
     const [problems, setProblems] = useState([]);
@@ -31,45 +31,28 @@ const ProblemListPage = () => {
             <Typography variant="h4" gutterBottom>
                 Problem List
             </Typography>
-            <List>
-                <ListItem>
-                    <Grid container spacing={2}>
-                        <Grid item xs={3}>
-                            <ListItemText primary="問題" />
-                        </Grid>
-                        <Grid item xs={2}>
-                            <ListItemText primary="得点" />
-                        </Grid>
-                        <Grid item xs={2}>
-                            <ListItemText primary="対応する回" />
-                        </Grid>
-                        <Grid item xs={2}>
-                            <ListItemText primary="解いた人数" />
-                        </Grid>
-                    </Grid>
-                </ListItem>
-
-                {Array.isArray(problems) && problems.map((problem) => (
-                    <ListItem key={problem.name}>
-                        <ListItemButton component={Link} to={`/problems/${problem.name}`}>
-                            <Grid container spacing={2}>
-                                <Grid item xs={3}>
-                                    <ListItemText primary={problem.title} />
-                                </Grid>
-                                <Grid item xs={2}>
-                                    <ListItemText primary={problem.point} />
-                                </Grid>
-                                <Grid item xs={2}>
-                                    <ListItemText primary={problem.section} />
-                                </Grid>
-                                <Grid item xs={2}>
-                                    <ListItemText primary={problem.solvedUserCount} />
-                                </Grid>
-                            </Grid>
-                        </ListItemButton>
-                    </ListItem>
-                ))}
-            </List>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>問題</TableCell>
+                            <TableCell>得点</TableCell>
+                            <TableCell>対応する回</TableCell>
+                            <TableCell>解いた人数</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {problems.map((problem) => (
+                            <TableRow key={problem.name} component={Link} to={`/problems/${problem.name}`} style={{ textDecoration: 'none' }}>
+                                <TableCell>{problem.title}</TableCell>
+                                <TableCell>{problem.point}</TableCell>
+                                <TableCell>{problem.section}</TableCell>
+                                <TableCell>{problem.solvedUserCount}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
         </div>
     );
 };
