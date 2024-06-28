@@ -12,13 +12,16 @@ $W = \begin{pmatrix}
 
 ## 出力
 $W$ 、$\boldsymbol{x}_1$、$\boldsymbol{x}_2$ についての勾配をそれぞれ改行区切りで出力してください。
-PyTorchで求まるそれぞれの勾配は `torch.tensor` オブジェクトになりますが、
-出力する際は `.flatten()` メソッドを用いてそれぞれの配列を一次元の配列に変換したうえで、その配列の要素を空白区切りで出力してください。
 
-つまり、この問題の答えがそれぞれ `gW`, `gx1`, `gx2` に格納されているとき、次のようにすると正しい出力になります。
+ここで、通常、勾配を保持する `Tensor` 型のオブジェクトとして得られます。
+
+`Tensor` 型のオブジェクトは、 `numpy` メソッドを用いることで、その中身を Numpy配列に変換することができます。
+
+そのため `W`, `gx1`, `gx2` という変数に答えが格納されている場合、次のようにして出力をすれば正しい形式で出力することができます。
+
 
 ```python
-print(*gW.flatten().numpy())
-print(*gx1.flatten().numpy())
-print(*gx2.flatten().numpy())
+print(*gW.numpy())
+print(*gx1.numpy())
+print(*gx2.numpy())
 ``` 
