@@ -18,9 +18,8 @@ def jst_now():
 class User(Base):
     __tablename__ = "users"
     id = Column(String, primary_key=True, index=True)
-    created_at = Column(TIMESTAMP, default=jst_now)
     icon_url = Column(String, nullable=True)
-    team_id = Column(Integer, nullable=True)
+    team_id = Column(String, nullable=True)
 
 class TeamMember(Base):
     __tablename__ = "team_members"
