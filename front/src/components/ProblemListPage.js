@@ -3,8 +3,18 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typog
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
+const getRandomColor = () => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+};
+
 const ProblemListPage = () => {
     const [problems, setProblems] = useState([]);
+    const [sectionColors, setSectionColors] = useState({});
 
     useEffect(() => {
         const fetchProblems = async () => {
@@ -17,7 +27,15 @@ const ProblemListPage = () => {
                     return { ...problem, solvedUserCount: solvedUserCountResponse.data.count };
                 }));
 
+                const newSectionColors = {};
+                problemsWithSolvedCount.forEach((problem) => {
+                    if (!newSectionColors[problem.section]) {
+                        newSectionColors[problem.section] = getRandomColor();
+                    }
+                });
+
                 setProblems(problemsWithSolvedCount);
+                setSectionColors(newSectionColors);
             } catch (error) {
                 console.error('There was an error fetching the problems!', error);
             }
@@ -35,6 +53,7 @@ const ProblemListPage = () => {
                 <Table>
                     <TableHead>
                         <TableRow>
+                            <TableCell></TableCell>
                             <TableCell>問題</TableCell>
                             <TableCell>得点</TableCell>
                             <TableCell>対応する回</TableCell>
@@ -44,6 +63,7 @@ const ProblemListPage = () => {
                     <TableBody>
                         {problems.map((problem) => (
                             <TableRow key={problem.name} component={Link} to={`/problems/${problem.name}`} style={{ textDecoration: 'none' }}>
+                                <TableCell style={{ borderLeft: `8px solid ${sectionColors[problem.section]}` }}></TableCell>
                                 <TableCell>{problem.title}</TableCell>
                                 <TableCell>{problem.point}</TableCell>
                                 <TableCell>{problem.section}</TableCell>
