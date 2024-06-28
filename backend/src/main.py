@@ -351,6 +351,28 @@ async def submit_code(
     dependencies=[Depends(verify_user)],
 )
 def get_result(task_id: str, db: Session = Depends(get_db)):
+    # まず db に結果があるか確認
+    try:
+        submit = get_submission(db, task_id)
+        # completed ならそのまま返す
+        if submit.status == "Completed":
+            return {
+                "status": "Completed",
+                "result": {
+                    "problem_name": submit.problem_name,
+                    "status": submit.status,
+                    "execution_time": submit.execution_time,
+                    "code": submit.code,
+                    "passed_cases": submit.pass_cases,
+                    "n_testcases": n_testcases(submit.problem_name),
+                    "points": submit.get_points,
+                    "submitted_at": submit.submitted_at,
+                },
+            }
+    except NoResultFound:
+        # 実行中なので次へ
+        pass
+
     task = evaluate_code.AsyncResult(task_id)
     if task.ready():
         result = task.get()
@@ -473,6 +495,9 @@ def get_mysubmissions(request: Request, db: Session = Depends(get_db)):
             "submitted_at": submission.submitted_at,
             "get_points": submission.get_points
         })
+
+    # submitted_at でソート
+    result = sorted(result, key=lambda x: x["submitted_at"], reverse=True)
     
     return result
 
