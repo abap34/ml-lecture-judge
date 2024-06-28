@@ -22,6 +22,7 @@ from db import (
     solve_user_count,
     get_teamid,
     update_submission,
+    get_user_submissions
 )
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -454,6 +455,26 @@ def get_team_leaderboard(db: Session = Depends(get_db)):
 )
 def get_solved_user_count(problem_name: str, db: Session = Depends(get_db)):
     return {"count": solve_user_count(db, problem_name)}
+
+@app.get(
+    "/mysubmissions", dependencies=[Depends(verify_user)]
+)
+def get_mysubmissions(request: Request, db: Session = Depends(get_db)):
+    id_token = load_token(request)
+    user_name = get_user_name(id_token)
+    my_submissions = get_user_submissions(db, user_name)
+    result = []
+    for submission in my_submissions:
+        result.append({
+            "id": submission.id,
+            "problem_name": submission.problem_name,
+            "status": submission.status,
+            "execution_time": submission.execution_time,
+            "submitted_at": submission.submitted_at,
+            "get_points": submission.get_points
+        })
+    
+    return result
 
 
 if __name__ == "__main__":

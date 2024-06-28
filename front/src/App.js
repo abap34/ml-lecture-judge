@@ -7,11 +7,11 @@ import React, { useEffect, useState } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import Leaderboard from './components/LeaderBoard';
 import ProblemDetail from './components/ProblemDetail';
-import ProblemListPage from './components/ProblemListPage'; // 追加
+import ProblemListPage from './components/ProblemListPage';
 import SubmissionResult from './components/SubmissionResult';
 import Welcome from './components/Welcome';
-import BackendStatus from './components/BackendStatus';  
-
+import BackendStatus from './components/BackendStatus';
+import MySubmissions from './components/MySubmissions'; 
 
 const theme = createTheme({
   palette: {
@@ -162,6 +162,11 @@ const AppContent = () => {
                 <ListItemText primary="Leaderboard" />
               </ListItemButton>
             </ListItem>
+            <ListItem>
+              <ListItemButton component={Link} to="/mysubmissions" onClick={toggleDrawer}> {/* 追加 */}
+                <ListItemText primary="My Submissions" /> {/* 追加 */}
+              </ListItemButton> {/* 追加 */}
+            </ListItem> {/* 追加 */}
           </List>
         </Drawer>
         <Box
@@ -173,7 +178,8 @@ const AppContent = () => {
             <Route path="/problems/:problemName" element={<ProblemDetail />} />
             <Route path="/result/:taskId" element={<SubmissionResult />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/problems" element={<ProblemListPage />} /> {/* 追加 */}
+            <Route path="/problems" element={<ProblemListPage />} />
+            <Route path="/mysubmissions" element={<MySubmissions />} /> {/* 追加 */}
             <Route path="/" element={<Welcome />} />
           </Routes>
         </Box>

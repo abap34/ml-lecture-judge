@@ -78,11 +78,15 @@ def get_submission(db: Session, submission_id: str) -> Submission:
         raise NoResultFound(f"No submission found with id: {submission_id}")
     return submission
 
+def get_user_submissions(db: Session, user_id: str) -> list[Submission]:
+    submissions = db.query(Submission).filter(Submission.user_id == user_id).all()
+    return submissions
+
 
 def add_user(
     db: Session, id: str, icon_url: Optional[str] = None, duplicate_ok: bool = False
 ) -> None:
-    user = User(id=id, icon_url=icon_url)
+    user = User(id=id, icon_url=icon_url, team_id="チームなし")
     if not duplicate_ok:
         db.add(user)
         db.commit()
@@ -90,7 +94,6 @@ def add_user(
     else:
         # いたら何もしない. いなければ追加
         if db.query(User).filter(User.id == id).first() is None:
-            user.team_id = "チームなし"
             db.add(user)
             db.commit()
             db.refresh(user)
