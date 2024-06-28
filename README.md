@@ -30,8 +30,21 @@ $ cd front
 $ npm install
 ```
 
+`.env` に以下の情報をおく
 
-### ビルド
+```plaintext
+TRAQ_CLIENT_ID=
+TRAQ_CLIENT_SECRET=
+SECRET_KEY=
+API_URL=
+FRONT_URL=
+CURRENT_SECTION=
+```
+
+`CURRENT_SECTION` より小さい問題だけが見えます。
+
+
+### ビルド (全部)
 
 ```bash
 $ ./build.sh
@@ -42,6 +55,15 @@ $ ./build.sh
 ```bash
 $ docker-compose up 
 ```
+
+### バックエンドだけビルドと起動
+
+```bash
+$ chomod +x deploy-back.sh
+$ ./deploy-back.sh
+```
+
+
 
 - `http://localhost:3000` (front)
 - `http://localhost:8000` (back)
