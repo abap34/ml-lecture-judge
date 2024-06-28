@@ -84,16 +84,22 @@ def get_user_submissions(db: Session, user_id: str) -> list[Submission]:
 
 
 def add_user(
-    db: Session, id: str, icon_url: Optional[str] = None, duplicate_ok: bool = False
+    db: Session, user_id: str, icon_url: Optional[str] = None, duplicate_ok: bool = False
 ) -> None:
-    user = User(id=id, icon_url=icon_url, team_id="チームなし")
+    # id が db に存在するかチェック
+    is_user_exist = db.query(User).filter(User.id == user_id).first()
+    if is_user_exist is not None:
+        print(user_id, "is already exist.")
+        return
+    
+    user = User(id=user_id, icon_url=icon_url, team_id="チームなし")
     if not duplicate_ok:
         db.add(user)
         db.commit()
         db.refresh(user)
     else:
         # いたら何もしない. いなければ追加
-        if db.query(User).filter(User.id == id).first() is None:
+        if db.query(User).filter(User.id == user_id).first() is None:
             db.add(user)
             db.commit()
             db.refresh(user)
@@ -231,6 +237,9 @@ def calculate_team_scores(db: Session) -> list[TeamLeaderBoardRow]:
     rank = 0
     prev_score = -1
     for team_id, total_score, total_submissions in results:
+        if team_id == "チームなし": 
+            continue
+        
         if prev_score != total_score:
             rank += 1
 
