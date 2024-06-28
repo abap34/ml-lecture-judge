@@ -34,6 +34,11 @@ const MySubmissions = () => {
       <Typography variant="h3" component="h1" gutterBottom>
         My Submissions
       </Typography>
+      
+      <Typography variant="body1" gutterBottom>
+        (既知の問題: 昔の一部の投稿およびジャッジが正常に動作しなかった投稿は詳細を見てもジャッジ中の状態になっているかもしれません。)
+      </Typography>
+
       <Box p={2} component={Paper}>
         <TableContainer>
           <Table>
