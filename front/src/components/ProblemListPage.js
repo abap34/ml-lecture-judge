@@ -3,23 +3,19 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typog
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
-// 適当にハッシュ
-const hashStringToColor = (str) => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    let color = '#';
-    for (let i = 0; i < 3; i++) {
-        const value = (hash >> (i * 8)) & 0xFF;
-        color += ('00' + value.toString(16)).substr(-2);
-    }
-    return color;
+const sectionColors = {
+    "0": "#FF5733",
+    "1": "#33FF57",
+    "2": "#3357FF",
+    "3": "#FF33A6",
+    "4": "#33FFF5",
+    "5": "#F5FF33",
+    "6": "#A633FF",
+    "7": "#FF8F33"
 };
 
 const ProblemListPage = () => {
     const [problems, setProblems] = useState([]);
-    const [sectionColors, setSectionColors] = useState({});
 
     useEffect(() => {
         const fetchProblems = async () => {
@@ -32,15 +28,7 @@ const ProblemListPage = () => {
                     return { ...problem, solvedUserCount: solvedUserCountResponse.data.count };
                 }));
 
-                const newSectionColors = {};
-                problemsWithSolvedCount.forEach((problem) => {
-                    if (!newSectionColors[problem.section]) {
-                        newSectionColors[problem.section] = hashStringToColor(problem.section);
-                    }
-                });
-
                 setProblems(problemsWithSolvedCount);
-                setSectionColors(newSectionColors);
             } catch (error) {
                 console.error('There was an error fetching the problems!', error);
             }
