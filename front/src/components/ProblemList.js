@@ -1,10 +1,10 @@
-import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper } from '@mui/material';
+import { List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 function ProblemList({ onClose }) {
-  const [problems, setProblms] = useState([]);
+  const [problems, setProblems] = useState([]);
 
   useEffect(() => {
     const fetchProblems = async () => {
@@ -20,24 +20,15 @@ function ProblemList({ onClose }) {
   }, []);
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Title</TableCell>
-            <TableCell>Description</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {Array.isArray(problems) && problems.map((problem) => (
-            <TableRow key={problem.name} component={Link} to={`/problems/${problem.name}`} onClick={onClose} style={{ textDecoration: 'none' }}>
-              <TableCell>{problem.title}</TableCell>
-              <TableCell>{problem.description}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <List>
+      {Array.isArray(problems) && problems.map((problem) => (
+        <ListItem key={problem.name}>
+          <ListItemButton component={Link} to={`/problems/${problem.name}`} onClick={onClose}>
+            <ListItemText primary={problem.title} />
+          </ListItemButton>
+        </ListItem>
+      ))}
+    </List>
   );
 }
 
