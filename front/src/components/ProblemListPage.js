@@ -4,14 +4,14 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 const sectionColors = {
-    "0": "#FF5733",
-    "1": "#33FF57",
-    "2": "#3357FF",
-    "3": "#FF33A6",
-    "4": "#33FFF5",
-    "5": "#F5FF33",
-    "6": "#A633FF",
-    "7": "#FF8F33"
+    "0": "#FFEBE5",
+    "1": "#E5FFEB",
+    "2": "#E5EBFF",
+    "3": "#FFE5F2",
+    "4": "#E5FFF7",
+    "5": "#FFFCE5",
+    "6": "#F2E5FF",
+    "7": "#FFEDCC"
 };
 
 const ProblemListPage = () => {
@@ -47,9 +47,9 @@ const ProblemListPage = () => {
                     <TableHead>
                         <TableRow>
                             <TableCell></TableCell>
+                            <TableCell>対応する回</TableCell>
                             <TableCell>問題</TableCell>
                             <TableCell>得点</TableCell>
-                            <TableCell>対応する回</TableCell>
                             <TableCell>解いた人数</TableCell>
                         </TableRow>
                     </TableHead>
@@ -57,9 +57,9 @@ const ProblemListPage = () => {
                         {problems.map((problem) => (
                             <TableRow key={problem.name} component={Link} to={`/problems/${problem.name}`} style={{ textDecoration: 'none' }}>
                                 <TableCell style={{ borderLeft: `8px solid ${sectionColors[problem.section]}` }}></TableCell>
+                                <TableCell>{problem.section}</TableCell>
                                 <TableCell>{problem.title}</TableCell>
                                 <TableCell>{problem.point}</TableCell>
-                                <TableCell>{problem.section}</TableCell>
                                 <TableCell>{problem.solvedUserCount}</TableCell>
                             </TableRow>
                         ))}
