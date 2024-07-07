@@ -193,7 +193,7 @@ const AppContent = () => {
         <DialogTitle id="alert-dialog-title">{"ログインが必要です"}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            問題の閲覧・提出はログインが必要です。ログインしますか？
+            問題の閲覧・提出は traQ アカウントによるログインが必要です。 ログインしますか？
           </DialogContentText>
         </DialogContent>
         <DialogActions>
